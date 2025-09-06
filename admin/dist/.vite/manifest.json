@@ -1,6 +1,6 @@
 {
-  "_App-HkgdN_kd.js": {
-    "file": "assets/App-HkgdN_kd.js",
+  "_App-DztX0TAv.js": {
+    "file": "assets/App-DztX0TAv.js",
     "name": "App",
     "css": [
       "assets/App-YuafcRQP.css"
@@ -11,21 +11,21 @@
     "src": "_App-YuafcRQP.css"
   },
   "index.html": {
-    "file": "assets/app-B65hMkBo.js",
+    "file": "assets/app-sXWAp_Fp.js",
     "name": "app",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_App-HkgdN_kd.js"
+      "_App-DztX0TAv.js"
     ]
   },
   "src/mount.tsx": {
-    "file": "assets/mount-DEgRDTKk.js",
+    "file": "assets/mount-DB2GNSzk.js",
     "name": "mount",
     "src": "src/mount.tsx",
     "isEntry": true,
     "imports": [
-      "_App-HkgdN_kd.js"
+      "_App-DztX0TAv.js"
     ]
   }
 }

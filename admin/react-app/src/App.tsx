@@ -41,24 +41,62 @@ function App({ attachment, onClose }: AppProps) {
         console.log('Opening media modal for seed image selection')
     }
 
-    const handleGeneratePhotos = () => {
+    const handleGeneratePhotos = async () => {
         if (!seedImage) {
             alert('Please select a seed image first')
             return
         }
 
         setIsGenerating(true)
-        // TODO: Implement actual AI photo generation logic
-        setTimeout(() => {
-            // Mock generated photos
-            const newPhotos: GeneratedPhoto[] = Array.from({ length: parseInt(numberOfPhotos) }, (_, i) => ({
-                id: `generated-${Date.now()}-${i}`,
-                url: seedImage.url, // Using seed image as placeholder
+
+        try {
+            // Get WordPress REST API settings
+            const wpSettings = (window as any).PBAIEnhance
+            if (!wpSettings) {
+                throw new Error('WordPress API settings not found')
+            }
+
+            // Prepare form data
+            const formData = new FormData()
+            formData.append('attachment_id', seedImage.id.toString())
+            formData.append('style', style)
+            if (additionalInstructions.trim()) {
+                formData.append('additional_instructions', additionalInstructions.trim())
+            }
+
+            // Make request to WordPress REST API
+            const response = await fetch(`${wpSettings.restBase}/generate-image`, {
+                method: 'POST',
+                headers: {
+                    'X-WP-Nonce': wpSettings.nonce,
+                },
+                body: formData,
+            })
+
+            const result = await response.json()
+
+            if (!response.ok || !result.success) {
+                throw new Error(result.error || 'Failed to generate image')
+            }
+
+            // Create new photo object with generated image data
+            const newPhoto: GeneratedPhoto = {
+                id: `generated-${result.attachment_id}`,
+                url: result.url,
                 timestamp: new Date()
-            }))
-            setGeneratedPhotos(prev => [...newPhotos, ...prev])
+            }
+
+            // Add to generated photos list
+            setGeneratedPhotos(prev => [newPhoto, ...prev])
+
+            alert('Image generated successfully!')
+
+        } catch (error) {
+            console.error('Image generation error:', error)
+            alert(`Failed to generate image: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        } finally {
             setIsGenerating(false)
-        }, 3000)
+        }
     }
 
     const handleClose = () => {
