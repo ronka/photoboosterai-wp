@@ -1,0 +1,7 @@
+---
+description: use context7 mcp
+globs:
+alwaysApply: true
+---
+
+Use Context7 MCP to access WordPress and WooCommerce documentation to know which filters or actions to use and how
