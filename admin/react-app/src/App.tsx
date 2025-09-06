@@ -33,12 +33,22 @@ function App({ attachment, onClose }: AppProps) {
     const [style, setStyle] = useState('Professional')
     const [additionalInstructions, setAdditionalInstructions] = useState('')
     const [generatedPhotos, setGeneratedPhotos] = useState<GeneratedPhoto[]>([])
+    const [selectedImagePopup, setSelectedImagePopup] = useState<GeneratedPhoto | null>(null)
     const modalRef = useRef<HTMLDivElement>(null)
     const closeButtonRef = useRef<HTMLButtonElement>(null)
+    const imagePopupRef = useRef<HTMLDivElement>(null)
 
     const handleSelectSeedImage = () => {
         // TODO: Implement WordPress media modal integration
         console.log('Opening media modal for seed image selection')
+    }
+
+    const handleImageClick = (photo: GeneratedPhoto) => {
+        setSelectedImagePopup(photo)
+    }
+
+    const handleCloseImagePopup = () => {
+        setSelectedImagePopup(null)
     }
 
     const handleGeneratePhotos = async () => {
@@ -109,7 +119,11 @@ function App({ attachment, onClose }: AppProps) {
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
-                handleClose()
+                if (selectedImagePopup) {
+                    handleCloseImagePopup()
+                } else {
+                    handleClose()
+                }
             }
 
             // Basic focus trap
@@ -285,7 +299,11 @@ function App({ attachment, onClose }: AppProps) {
                             {generatedPhotos.length > 0 ? (
                                 <div className="pbai-photos-grid">
                                     {generatedPhotos.map((photo) => (
-                                        <div key={photo.id} className="pbai-generated-photo">
+                                        <div
+                                            key={photo.id}
+                                            className="pbai-generated-photo"
+                                            onClick={() => handleImageClick(photo)}
+                                        >
                                             <img
                                                 src={photo.url}
                                                 alt="Generated photo"
@@ -306,6 +324,33 @@ function App({ attachment, onClose }: AppProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Image Popup Modal */}
+            {selectedImagePopup && (
+                <div className="pbai-image-popup-overlay" onClick={handleCloseImagePopup}>
+                    <div
+                        className="pbai-image-popup-modal"
+                        ref={imagePopupRef}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            className="pbai-image-popup-close"
+                            onClick={handleCloseImagePopup}
+                            aria-label="Close image"
+                        >
+                            ×
+                        </button>
+                        <img
+                            src={selectedImagePopup.url}
+                            alt="Generated photo"
+                            className="pbai-image-popup-image"
+                        />
+                        <div className="pbai-image-popup-info">
+                            <p>Generated on {selectedImagePopup.timestamp.toLocaleString()}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
