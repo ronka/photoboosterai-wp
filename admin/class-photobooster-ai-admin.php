@@ -148,7 +148,7 @@ class Photobooster_Ai_Admin {
 	/**
 	 * Load and decode the Vite manifest.json from the admin dist directory.
 	 * Returns an associative array keyed by entries with their asset metadata.
-	 * If the manifest does not exist or is invalid, an empty array is returned.
+	 * If the manifest does not exist or is invalid, a fallback manifest is returned.
 	 *
 	 * @since 1.0.0
 	 * @return array
@@ -156,17 +156,68 @@ class Photobooster_Ai_Admin {
 	private function get_vite_manifest_map() {
 		$manifest_path = $this->get_admin_dist_path() . 'manifest.json';
 		if ( ! file_exists( $manifest_path ) ) {
-			return array();
+			// Fallback manifest based on current built assets
+			return $this->get_fallback_manifest();
 		}
 		$raw = file_get_contents( $manifest_path );
 		if ( false === $raw ) {
-			return array();
+			return $this->get_fallback_manifest();
 		}
 		$decoded = json_decode( $raw, true );
 		if ( ! is_array( $decoded ) ) {
-			return array();
+			return $this->get_fallback_manifest();
 		}
 		return $decoded;
+	}
+
+	/**
+	 * Generate a fallback manifest by scanning the dist directory for built assets.
+	 *
+	 * @since 1.0.0
+	 * @return array
+	 */
+	private function get_fallback_manifest() {
+		$dist_path = $this->get_admin_dist_path();
+		$assets_path = $dist_path . 'assets/';
+		
+		$manifest = array();
+		
+		if ( is_dir( $assets_path ) ) {
+			$files = scandir( $assets_path );
+			foreach ( $files as $file ) {
+				if ( $file === '.' || $file === '..' ) {
+					continue;
+				}
+				
+				// Map common file patterns to entries
+				if ( strpos( $file, 'mount-' ) === 0 && substr( $file, -3 ) === '.js' ) {
+					$manifest['src/mount.tsx'] = array(
+						'file' => 'assets/' . $file,
+						'isEntry' => true,
+					);
+					
+					// Look for corresponding CSS file with same hash pattern
+					$css_file = str_replace( '.js', '.css', $file );
+					if ( file_exists( $assets_path . $css_file ) ) {
+						$manifest['src/mount.tsx']['css'] = array( 'assets/' . $css_file );
+					} else {
+						// Try to find any mount CSS file
+						$css_files = glob( $assets_path . 'mount-*.css' );
+						if ( ! empty( $css_files ) ) {
+							$css_filename = basename( $css_files[0] );
+							$manifest['src/mount.tsx']['css'] = array( 'assets/' . $css_filename );
+						}
+					}
+				} elseif ( strpos( $file, 'app-' ) === 0 && substr( $file, -3 ) === '.js' ) {
+					$manifest['src/main.tsx'] = array(
+						'file' => 'assets/' . $file,
+						'isEntry' => true,
+					);
+				}
+			}
+		}
+		
+		return $manifest;
 	}
 
 }

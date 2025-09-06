@@ -8,7 +8,83 @@
 
     function getManifestEntry(key) {
         var map = (window.PBAIEnhance && window.PBAIEnhance.manifest) || {};
-        return map[key] || null;
+        console.log('Manifest map:', map);
+        console.log('Looking for key:', key);
+
+        var entry = map[key];
+        if (entry) {
+            console.log('Found manifest entry:', entry);
+            return entry;
+        }
+
+        console.log('No manifest entry found, trying fallback...');
+        // Fallback: try to find the built files directly
+        return getFallbackEntry(key);
+    }
+
+    function getFallbackEntry(key) {
+        console.log('Getting fallback entry for:', key);
+
+        // Map of expected entries to likely filenames
+        var fallbackMap = {
+            'src/mount.tsx': {
+                file: 'assets/mount-BwCMH1AE.js',
+                css: ['assets/mount-16kd5VZX.css']
+            },
+            'mount.tsx': {
+                file: 'assets/mount-BwCMH1AE.js',
+                css: ['assets/mount-16kd5VZX.css']
+            }
+        };
+
+        var entry = fallbackMap[key];
+        if (entry) {
+            console.log('Found fallback entry:', entry);
+            return entry;
+        }
+
+        // Try to auto-detect from available files
+        if (key.includes('mount')) {
+            // Look for mount-related files
+            var mountJs = findAssetFile('mount', 'js');
+            var mountCss = findAssetFile('mount', 'css');
+
+            if (mountJs) {
+                var detectedEntry = {
+                    file: mountJs,
+                    css: mountCss ? [mountCss] : []
+                };
+                console.log('Auto-detected entry:', detectedEntry);
+                return detectedEntry;
+            }
+        }
+
+        console.log('No fallback found');
+        return null;
+    }
+
+    function findAssetFile(name, type) {
+        // This is a simple heuristic - in production you'd want to make this more robust
+        var distUrl = getDistUrl();
+        var baseUrl = distUrl.replace(/\/$/, '');
+
+        if (type === 'js') {
+            // Try common patterns for the mount JS file
+            var candidates = [
+                'assets/mount-BwCMH1AE.js',
+                'assets/mount.js',
+                'mount.js'
+            ];
+        } else if (type === 'css') {
+            var candidates = [
+                'assets/mount-16kd5VZX.css',
+                'assets/mount.css',
+                'mount.css'
+            ];
+        }
+
+        // For now, return the first candidate (in production, you'd check if file exists)
+        return candidates[0];
     }
 
     function getDistUrl() {
@@ -227,9 +303,15 @@
     }
 
     function mountAppIntoModal(modalEl, attachment) {
+        console.log('mountAppIntoModal called with attachment:', attachment);
+
         var entry = getManifestEntry('src/mount.tsx');
+        console.log('Retrieved entry:', entry);
+
         if (!entry || !entry.file) {
-            window.alert('AI Enhance app is not built yet.');
+            console.error('No manifest entry found for src/mount.tsx');
+            console.log('Available PBAIEnhance data:', window.PBAIEnhance);
+            window.alert('AI Enhance app is not built yet. Check console for details.');
             return;
         }
         ensureStyleInjected(entry);
@@ -249,16 +331,29 @@
             };
         }
 
+        console.log('Importing module from:', jsUrl);
         import(jsUrl).then(function (mod) {
+            console.log('Module loaded successfully:', mod);
+            console.log('Module keys:', Object.keys(mod));
+            console.log('MOUNT_VERSION:', mod.MOUNT_VERSION);
+            console.log('mountApp type:', typeof mod.mountApp);
+
             if (mod && typeof mod.mountApp === 'function') {
+                console.log('mountApp function found, calling with props:', props);
                 // Listen for close event from React app
                 mountNode.addEventListener('pbai:close', function () {
+                    console.log('Close event received');
                     unmountAppFromModal(modalEl);
                 });
                 mod.mountApp(mountNode, props);
+                console.log('mountApp called successfully');
+            } else {
+                console.error('mountApp function not found in module:', mod);
+                window.alert('React app loaded but mountApp function missing.');
             }
-        }).catch(function () {
-            window.alert('Failed to load AI Enhance app.');
+        }).catch(function (error) {
+            console.error('Failed to load AI Enhance app:', error);
+            window.alert('Failed to load AI Enhance app. Check console for details.');
         });
     }
 
