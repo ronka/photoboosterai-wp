@@ -1,4 +1,4 @@
-/* PhotoBooster AI Overlay Styles */
+/* PhotoBooster AI Photo Generator Styles */
 .pbai-overlay {
   position: fixed;
   top: 0;
@@ -17,11 +17,17 @@
   background: white;
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  max-width: 800px;
+  max-width: 1200px;
   width: 100%;
   max-height: 90vh;
-  overflow: auto;
+  overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.pbai-modal * {
+  box-sizing: border-box;
 }
 
 .pbai-header {
@@ -30,6 +36,7 @@
   align-items: center;
   padding: 20px 20px 10px;
   border-bottom: 1px solid #e1e5e9;
+  flex-shrink: 0;
 }
 
 .pbai-header h2 {
@@ -59,74 +66,283 @@
   color: #333;
 }
 
-.pbai-content {
+/* Main Content - Two Panel Layout */
+.pbai-main-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.pbai-left-panel {
+  flex: 0 0 400px;
   padding: 20px;
+  border-right: 1px solid #e1e5e9;
+  overflow-y: auto;
+  background: #fafafa;
 }
 
-.pbai-preview {
-  text-align: center;
-  margin-bottom: 20px;
+.pbai-right-panel {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  background: white;
 }
 
-.pbai-image {
-  max-width: 100%;
-  max-height: 400px;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+/* Seed Image Section */
+.pbai-seed-section {
+  margin-bottom: 30px;
 }
 
-.pbai-info {
-  background: #f8f9fa;
-  padding: 15px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-}
-
-.pbai-info h3 {
-  margin: 0 0 10px 0;
+.pbai-seed-section h3 {
+  margin: 0 0 15px 0;
   color: #23282d;
   font-size: 16px;
   font-weight: 600;
 }
 
-.pbai-info p {
-  margin: 5px 0;
-  color: #666;
-  font-size: 14px;
+.pbai-seed-image-container {
+  background: white;
+  border-radius: 6px;
+  padding: 15px;
+  border: 1px solid #e1e5e9;
 }
 
-.pbai-actions {
+.pbai-seed-image-wrapper {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.pbai-seed-image {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pbai-no-seed-image {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.pbai-placeholder-image {
+  width: 200px;
+  height: 150px;
+  background: #f8f9fa;
+  border: 2px dashed #ddd;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 32px;
+  color: #999;
+}
+
+.pbai-seed-label {
+  margin: 10px 0;
+  color: #666;
+  font-size: 14px;
   text-align: center;
 }
 
-.pbai-enhance-btn {
+.pbai-select-seed-btn {
+  background: #0073aa;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.pbai-select-seed-btn:hover {
+  background: #005a87;
+}
+
+/* Configuration Section */
+.pbai-config-section {
+  margin-bottom: 30px;
+}
+
+.pbai-form-group {
+  margin-bottom: 20px;
+}
+
+.pbai-form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: #23282d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pbai-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background: white;
+  color: #23282d;
+  cursor: pointer;
+}
+
+.pbai-select:focus {
+  outline: none;
+  border-color: #0073aa;
+  box-shadow: 0 0 0 1px #0073aa;
+}
+
+.pbai-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.pbai-textarea:focus {
+  outline: none;
+  border-color: #0073aa;
+  box-shadow: 0 0 0 1px #0073aa;
+}
+
+.pbai-textarea::placeholder {
+  color: #999;
+}
+
+/* Actions Section */
+.pbai-actions {
+  margin-top: auto;
+}
+
+.pbai-generate-btn {
   background: #0073aa;
   color: white;
   border: none;
   padding: 12px 24px;
   border-radius: 4px;
   font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
-  min-width: 160px;
+  width: 100%;
 }
 
-.pbai-enhance-btn:hover:not(:disabled) {
+.pbai-generate-btn:hover:not(:disabled) {
   background: #005a87;
 }
 
-.pbai-enhance-btn:disabled {
+.pbai-generate-btn:disabled {
   background: #ccc;
   cursor: not-allowed;
 }
 
-.pbai-error {
-  text-align: center;
-  color: #d63638;
-  padding: 40px 20px;
+/* Right Panel - Generated Photos */
+.pbai-right-panel h3 {
+  margin: 0 0 20px 0;
+  color: #23282d;
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.pbai-error p {
-  margin: 0;
+.pbai-generated-photos {
+  height: 100%;
+}
+
+.pbai-photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.pbai-generated-photo {
+  background: white;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.pbai-generated-photo:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.pbai-generated-image {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.pbai-no-photos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 200px;
+}
+
+.pbai-no-photos-placeholder {
+  text-align: center;
+  color: #999;
+}
+
+.pbai-no-photos-placeholder p {
+  margin: 0 0 5px 0;
   font-size: 16px;
+}
+
+.pbai-no-photos-subtitle {
+  font-size: 14px !important;
+  color: #bbb !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .pbai-modal {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .pbai-main-content {
+    flex-direction: column;
+  }
+
+  .pbai-left-panel {
+    flex: none;
+    border-right: none;
+    border-bottom: 1px solid #e1e5e9;
+  }
+
+  .pbai-photos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .pbai-overlay {
+    padding: 10px;
+  }
+
+  .pbai-header {
+    padding: 15px;
+  }
+
+  .pbai-left-panel,
+  .pbai-right-panel {
+    padding: 15px;
+  }
+
+  .pbai-placeholder-image {
+    width: 150px;
+    height: 100px;
+  }
 }

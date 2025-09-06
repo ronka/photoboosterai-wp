@@ -154,7 +154,7 @@ class Photobooster_Ai_Admin {
 	 * @return array
 	 */
 	private function get_vite_manifest_map() {
-		$manifest_path = $this->get_admin_dist_path() . 'manifest.json';
+		$manifest_path = $this->get_admin_dist_path() . '.vite/manifest.json';
 		if ( ! file_exists( $manifest_path ) ) {
 			// Fallback manifest based on current built assets
 			return $this->get_fallback_manifest();

@@ -10,7 +10,7 @@ let currentTarget: HTMLElement | null = null
 export const MOUNT_VERSION = '1.1.0'
 console.log('Mount module loaded, version:', MOUNT_VERSION)
 
-export function mountApp(target: HTMLElement, props?: Record<string, unknown>) {
+function mountApp(target: HTMLElement, props?: Record<string, unknown>) {
     console.log('mountApp called with target:', target, 'props:', props)
 
     if (root) {
@@ -45,9 +45,21 @@ export function mountApp(target: HTMLElement, props?: Record<string, unknown>) {
     }
 }
 
-export function unmountApp() {
+function unmountApp() {
     if (!root) return
     root.unmount()
     root = null
     currentTarget = null
 }
+
+// Ensure functions are available globally and not tree-shaken
+if (typeof window !== 'undefined') {
+    // @ts-ignore
+    window.PBAIMountApp = mountApp
+    // @ts-ignore
+    window.PBAIUnmountApp = unmountApp
+    console.log('Mount functions exposed globally')
+}
+
+// Export for ES module usage - these should not be tree-shaken due to side effects
+export { mountApp, unmountApp }

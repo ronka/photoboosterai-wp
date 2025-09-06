@@ -270,16 +270,36 @@
     }
 
     function ensureStyleInjected(entry) {
-        if (!entry || !entry.css) return;
-        (entry.css || []).forEach(function (css) {
-            var href = getDistUrl() + css;
-            if (document.querySelector('link[data-pbai-css="' + href + '"]')) return;
-            var link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = href;
-            link.setAttribute('data-pbai-css', href);
-            document.head.appendChild(link);
-        });
+        var manifest = (window.PBAIEnhance && window.PBAIEnhance.manifest) || {};
+
+        // Function to inject CSS from a single entry
+        function injectCssFromEntry(entryToCheck) {
+            if (!entryToCheck || !entryToCheck.css) return;
+            (entryToCheck.css || []).forEach(function (css) {
+                var href = getDistUrl() + css;
+                if (document.querySelector('link[data-pbai-css="' + href + '"]')) return;
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = href;
+                link.setAttribute('data-pbai-css', href);
+                document.head.appendChild(link);
+                console.log('Injected CSS:', href);
+            });
+        }
+
+        // Inject CSS from the main entry
+        injectCssFromEntry(entry);
+
+        // Also inject CSS from imported chunks
+        if (entry && entry.imports) {
+            entry.imports.forEach(function (importKey) {
+                var importedEntry = manifest[importKey];
+                if (importedEntry) {
+                    console.log('Checking imported entry for CSS:', importKey, importedEntry);
+                    injectCssFromEntry(importedEntry);
+                }
+            });
+        }
     }
 
     function createMountNode(modalEl) {
@@ -314,7 +334,31 @@
             window.alert('AI Enhance app is not built yet. Check console for details.');
             return;
         }
+        console.log('Entry before CSS injection:', entry);
         ensureStyleInjected(entry);
+
+        // Manual fallback: inject App CSS directly
+        var manifest = (window.PBAIEnhance && window.PBAIEnhance.manifest) || {};
+        console.log('Full manifest:', manifest);
+
+        // Look for App CSS in the manifest
+        Object.keys(manifest).forEach(function (key) {
+            var manifestEntry = manifest[key];
+            if (manifestEntry.css && manifestEntry.css.length > 0) {
+                console.log('Found CSS in manifest entry:', key, manifestEntry.css);
+                manifestEntry.css.forEach(function (css) {
+                    var href = getDistUrl() + css;
+                    if (!document.querySelector('link[data-pbai-css="' + href + '"]')) {
+                        var link = document.createElement('link');
+                        link.rel = 'stylesheet';
+                        link.href = href;
+                        link.setAttribute('data-pbai-css', href);
+                        document.head.appendChild(link);
+                        console.log('Manually injected CSS:', href);
+                    }
+                });
+            }
+        });
         var jsUrl = getDistUrl() + entry.file;
         var mountNode = createMountNode(modalEl);
 
@@ -338,17 +382,25 @@
             console.log('MOUNT_VERSION:', mod.MOUNT_VERSION);
             console.log('mountApp type:', typeof mod.mountApp);
 
-            if (mod && typeof mod.mountApp === 'function') {
+            // Try to get mountApp from module exports first, then fall back to global
+            var mountAppFn = mod.mountApp || window.PBAIMountApp;
+            console.log('mountApp function found:', typeof mountAppFn);
+
+            if (typeof mountAppFn === 'function') {
                 console.log('mountApp function found, calling with props:', props);
                 // Listen for close event from React app
                 mountNode.addEventListener('pbai:close', function () {
                     console.log('Close event received');
                     unmountAppFromModal(modalEl);
                 });
-                mod.mountApp(mountNode, props);
+                mountAppFn(mountNode, props);
                 console.log('mountApp called successfully');
             } else {
-                console.error('mountApp function not found in module:', mod);
+                console.error('mountApp function not found in module or global scope:', mod);
+                console.log('Available global functions:', {
+                    PBAIMountApp: typeof window.PBAIMountApp,
+                    PBAIUnmountApp: typeof window.PBAIUnmountApp
+                });
                 window.alert('React app loaded but mountApp function missing.');
             }
         }).catch(function (error) {
@@ -362,8 +414,10 @@
         if (!entry || !entry.file) return;
         var jsUrl = getDistUrl() + entry.file;
         import(jsUrl).then(function (mod) {
-            if (mod && typeof mod.unmountApp === 'function') {
-                mod.unmountApp();
+            // Try to get unmountApp from module exports first, then fall back to global
+            var unmountAppFn = mod.unmountApp || window.PBAIUnmountApp;
+            if (typeof unmountAppFn === 'function') {
+                unmountAppFn();
             }
             removeMountNode(modalEl);
         }).catch(function () {
