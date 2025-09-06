@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -10,8 +11,8 @@ export default defineConfig({
     manifest: true,
     rollupOptions: {
       input: {
-        app: 'index.html',
-        mount: 'src/mount.tsx',
+        app: resolve(__dirname, 'index.html'),
+        mount: resolve(__dirname, 'src/mount.tsx'),
       },
     },
   },

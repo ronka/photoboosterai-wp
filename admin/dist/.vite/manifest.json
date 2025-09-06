@@ -1,27 +1,20 @@
 {
   "index.html": {
-    "file": "assets/app-Dh4q-HeX.js",
+    "file": "assets/app-C2TzZmaZ.js",
     "name": "app",
     "src": "index.html",
     "isEntry": true,
     "imports": [
       "src/mount.tsx"
-    ],
-    "assets": [
-      "assets/react-CHdo91hT.svg"
     ]
   },
-  "src/assets/react.svg": {
-    "file": "assets/react-CHdo91hT.svg",
-    "src": "src/assets/react.svg"
-  },
   "src/mount.tsx": {
-    "file": "assets/mount-C5moqjy8.js",
+    "file": "assets/mount-BwCMH1AE.js",
     "name": "mount",
     "src": "src/mount.tsx",
     "isEntry": true,
     "css": [
-      "assets/mount-D8b4DHJx.css"
+      "assets/mount-16kd5VZX.css"
     ]
   }
 }

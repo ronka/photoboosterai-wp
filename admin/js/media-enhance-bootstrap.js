@@ -15,14 +15,182 @@
         return (window.PBAIEnhance && window.PBAIEnhance.distUrl) || '';
     }
 
-    function eligibleImageSelected($container) {
-        // Try to read selected attachment mime by file name extension as a basic heuristic
-        var $filename = $container.find('.attachment-info .filename, .attachment-details .filename, .media-sidebar .filename strong, .media-sidebar .filename').first();
-        var name = $filename.text() || '';
-        name = name.toLowerCase();
-        if (/(\.jpe?g|\.png|\.webp)$/.test(name)) return true;
-        // If filename unavailable, conservatively show button and let app validate later
-        return !$filename.length;
+    function eligibleImageSelected(selectedAttachment) {
+        if (!selectedAttachment) return false;
+
+        var mime = selectedAttachment.get ? selectedAttachment.get('mime') :
+            selectedAttachment.mime || selectedAttachment.subtype || '';
+
+        // Check for eligible image MIME types
+        var eligibleMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        return eligibleMimes.indexOf(mime) !== -1;
+    }
+
+    function getSelectedAttachment($modal) {
+        console.log('getSelectedAttachment called');
+
+        // Method 1: Try to get from wp.media frame
+        if (window.wp && window.wp.media && window.wp.media.frame) {
+            try {
+                var selection = window.wp.media.frame.state().get('selection');
+                if (selection && selection.length) {
+                    console.log('Found attachment via wp.media.frame:', selection.first());
+                    return selection.first();
+                }
+            } catch (e) {
+                console.log('wp.media.frame method failed:', e);
+            }
+        }
+
+        // Method 2: Try alternative wp.media approach
+        if (window.wp && window.wp.media && window.wp.media.frames) {
+            try {
+                for (var frameId in window.wp.media.frames) {
+                    var frame = window.wp.media.frames[frameId];
+                    if (frame && frame.state && frame.state().get) {
+                        var selection = frame.state().get('selection');
+                        if (selection && selection.length) {
+                            console.log('Found attachment via wp.media.frames:', selection.first());
+                            return selection.first();
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log('wp.media.frames method failed:', e);
+            }
+        }
+
+        // Method 3: Parse from DOM - look for selected attachment ID
+        if ($modal && $modal.length) {
+            try {
+                console.log('Searching DOM for attachment...', $modal.get(0));
+
+                // Look for attachment ID in various places
+                var $selected = $modal.find('.attachment.selected, .attachment.details, .attachment-details');
+                console.log('Found selected elements:', $selected.length);
+
+                if ($selected.length) {
+                    var attachmentId = $selected.attr('data-id') || $selected.data('id');
+                    if (attachmentId) {
+                        console.log('Found attachment ID from DOM:', attachmentId);
+                        return createAttachmentFromDOM($modal, attachmentId);
+                    }
+                }
+
+                // Look for data-id on any element
+                var $withDataId = $modal.find('[data-id]');
+                console.log('Elements with data-id:', $withDataId.length);
+                if ($withDataId.length) {
+                    var attachmentId = $withDataId.first().attr('data-id');
+                    if (attachmentId && /^\d+$/.test(attachmentId)) {
+                        console.log('Found attachment ID from data-id:', attachmentId);
+                        return createAttachmentFromDOM($modal, attachmentId);
+                    }
+                }
+
+                // Look in attachment details for edit link
+                var $details = $modal.find('.attachment-details, .media-sidebar');
+                if ($details.length) {
+                    var $link = $details.find('a[href*="post.php?post="], a[href*="edit.php?post="]').first();
+                    if ($link.length) {
+                        var href = $link.attr('href');
+                        var match = href.match(/post=(\d+)/);
+                        if (match) {
+                            var attachmentId = match[1];
+                            console.log('Found attachment ID from details link:', attachmentId);
+                            return createAttachmentFromDOM($modal, attachmentId);
+                        }
+                    }
+                }
+
+                // Look for attachment ID in URL fragments or other attributes
+                var allElements = $modal.find('*');
+                for (var i = 0; i < allElements.length; i++) {
+                    var el = allElements[i];
+                    var id = el.getAttribute('id');
+                    if (id && id.indexOf('attachment-') === 0) {
+                        var attachmentId = id.replace('attachment-', '');
+                        if (/^\d+$/.test(attachmentId)) {
+                            console.log('Found attachment ID from element ID:', attachmentId);
+                            return createAttachmentFromDOM($modal, attachmentId);
+                        }
+                    }
+                }
+
+            } catch (e) {
+                console.log('DOM parsing method failed:', e);
+            }
+        }
+
+        console.log('No attachment found');
+        return null;
+    }
+
+    function createAttachmentFromDOM($modal, attachmentId) {
+        try {
+            console.log('Creating attachment from DOM for ID:', attachmentId);
+
+            // Extract what we can from the DOM
+            var $filename = $modal.find('.filename, .media-sidebar .filename strong, .attachment-details .filename').first();
+            var filename = $filename.text().trim() || '';
+            console.log('Found filename:', filename);
+
+            var $title = $modal.find('.title, .media-sidebar .title, .attachment-details .title, input[name="title"]').first();
+            var title = '';
+            if ($title.is('input')) {
+                title = $title.val() || '';
+            } else {
+                title = $title.text().trim() || '';
+            }
+            title = title || filename;
+            console.log('Found title:', title);
+
+            // Try to get the image src from multiple possible locations
+            var $img = $modal.find('.details-image img, .attachment-preview img, .thumbnail img, img').first();
+            var url = $img.attr('src') || $img.attr('data-src') || '';
+            console.log('Found image URL:', url);
+
+            // Look for full-size URL
+            var $fullLink = $modal.find('a[href*=".jpg"], a[href*=".jpeg"], a[href*=".png"], a[href*=".webp"]').first();
+            var fullUrl = $fullLink.attr('href') || url;
+
+            // Guess MIME type from filename or URL
+            var mime = '';
+            var testUrl = filename || url;
+            if (testUrl.match(/\.jpe?g$/i)) mime = 'image/jpeg';
+            else if (testUrl.match(/\.png$/i)) mime = 'image/png';
+            else if (testUrl.match(/\.webp$/i)) mime = 'image/webp';
+            console.log('Detected MIME type:', mime);
+
+            // Try to extract additional metadata
+            var $alt = $modal.find('input[name="alt"], [name="alt"]').first();
+            var alt = $alt.is('input') ? $alt.val() : $alt.text();
+
+            var attachment = {
+                id: parseInt(attachmentId, 10),
+                title: title,
+                filename: filename,
+                url: fullUrl || url,
+                mime: mime,
+                alt: alt || '',
+                sizes: url ? {
+                    full: { url: fullUrl || url },
+                    large: { url: url },
+                    medium: { url: url },
+                    thumbnail: { url: url }
+                } : {},
+                // Add get method for compatibility
+                get: function (key) {
+                    return this[key];
+                }
+            };
+
+            console.log('Created attachment from DOM:', attachment);
+            return attachment;
+        } catch (e) {
+            console.log('Error creating attachment from DOM:', e);
+            return null;
+        }
     }
 
     function ensureStyleInjected(entry) {
@@ -58,7 +226,7 @@
         if (node && node.parentNode) node.parentNode.removeChild(node);
     }
 
-    function mountAppIntoModal(modalEl) {
+    function mountAppIntoModal(modalEl, attachment) {
         var entry = getManifestEntry('src/mount.tsx');
         if (!entry || !entry.file) {
             window.alert('AI Enhance app is not built yet.');
@@ -67,9 +235,27 @@
         ensureStyleInjected(entry);
         var jsUrl = getDistUrl() + entry.file;
         var mountNode = createMountNode(modalEl);
+
+        // Prepare attachment props
+        var props = {};
+        if (attachment) {
+            props.attachment = {
+                id: attachment.get ? attachment.get('id') : attachment.id,
+                title: attachment.get ? attachment.get('title') : attachment.title,
+                url: attachment.get ? attachment.get('url') : attachment.url,
+                mime: attachment.get ? attachment.get('mime') : attachment.mime,
+                filename: attachment.get ? attachment.get('filename') : attachment.filename,
+                sizes: attachment.get ? attachment.get('sizes') : attachment.sizes
+            };
+        }
+
         import(jsUrl).then(function (mod) {
             if (mod && typeof mod.mountApp === 'function') {
-                mod.mountApp(mountNode, {});
+                // Listen for close event from React app
+                mountNode.addEventListener('pbai:close', function () {
+                    unmountAppFromModal(modalEl);
+                });
+                mod.mountApp(mountNode, props);
             }
         }).catch(function () {
             window.alert('Failed to load AI Enhance app.');
@@ -112,28 +298,42 @@
 
         var selector = '[data-pbai-enhance="1"]';
         var $btn = $target.find(selector);
-        if (!$btn.length) {
+        var selectedAttachment = getSelectedAttachment($modal);
+        var isEligible = eligibleImageSelected(selectedAttachment);
+
+        console.log('Selected attachment:', selectedAttachment, 'Eligible:', isEligible);
+
+        if (!$btn.length && isEligible) {
             console.log('Creating button...');
             $btn = $('<button>', {
                 'text': '✨ AI Enhance',
-                'class': 'button button-primary',
-                'data-pbai-enhance': '1',
-                'css': {
-                    marginBottom: '8px',
-                    backgroundColor: '#0073aa',
-                    color: 'white'
-                }
+                'data-pbai-enhance': '1'
             });
             $btn.on('click', function () {
                 console.log('Button clicked!');
+                var attachment = getSelectedAttachment($modal);
+                if (!eligibleImageSelected(attachment)) {
+                    alert('Please select a valid image file (JPEG, PNG, or WebP).');
+                    return;
+                }
                 var modalEl = $modal.get(0);
-                mountAppIntoModal(modalEl);
+                mountAppIntoModal(modalEl, attachment);
             });
             $target.prepend($btn);
             console.log('Button injected into:', $target.get(0));
         }
-        // Always show; eligibility will be validated inside the app
-        $btn.show();
+
+        // Show/hide button based on eligibility and selection state
+        if ($btn.length) {
+            if (isEligible && selectedAttachment) {
+                $btn.show();
+            } else {
+                $btn.hide();
+            }
+        } else if (!isEligible || !selectedAttachment) {
+            // Remove any existing buttons if selection becomes ineligible
+            $target.find(selector).remove();
+        }
     }
 
     function observeMediaModal() {
@@ -159,12 +359,36 @@
             injectOrUpdateButton($node);
         });
         innerObs.observe(node, { childList: true, subtree: true });
+
+        // Listen for wp.media selection changes
+        if (window.wp && window.wp.media && window.wp.media.frame) {
+            var frame = window.wp.media.frame;
+            if (frame.on) {
+                frame.on('selection:single selection:toggle', function () {
+                    setTimeout(function () {
+                        injectOrUpdateButton($node);
+                    }, 50);
+                });
+            }
+        }
+
         // Cleanup on close for modal variant
         if (node.classList && node.classList.contains('media-modal')) {
             $node.on('click', '.media-modal-close, .media-modal-backdrop', function () {
                 unmountAppFromModal(node);
                 $node.find('[data-pbai-enhance="1"]').remove();
             });
+        }
+
+        // Listen for when media frame closes completely
+        if (window.wp && window.wp.media && window.wp.media.frame) {
+            var frame = window.wp.media.frame;
+            if (frame.on) {
+                frame.on('close', function () {
+                    $node.find('[data-pbai-enhance="1"]').remove();
+                    unmountAppFromModal(node);
+                });
+            }
         }
     }
 

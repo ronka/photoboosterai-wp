@@ -2,3 +2,84 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+
+/* PhotoBooster AI Admin Styles */
+
+/* AI Enhance Button in Media Modal */
+[data-pbai-enhance="1"] {
+    display: inline-block;
+    margin: 0 0 10px 0;
+    padding: 6px 10px;
+    font-size: 13px;
+    line-height: 1.4;
+    border-radius: 3px;
+    border: 1px solid #0073aa;
+    background: #0073aa;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 1px 0 rgba(120, 200, 230, 0.5) inset, 0 1px 0 rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+    position: relative;
+    min-width: 100px;
+    text-align: center;
+    font-weight: 500;
+}
+
+[data-pbai-enhance="1"]:hover {
+    background: #005a87;
+    border-color: #005a87;
+    color: #fff;
+    box-shadow: 0 1px 0 rgba(120, 200, 230, 0.6) inset, 0 1px 0 rgba(0, 0, 0, 0.15);
+}
+
+[data-pbai-enhance="1"]:focus {
+    box-shadow: 0 0 0 1px #fff, 0 0 0 3px #0073aa;
+    outline: none;
+}
+
+[data-pbai-enhance="1"]:active {
+    background: #005a87;
+    border-color: #005a87;
+    box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
+    transform: translateY(1px);
+}
+
+/* Ensure the button doesn't shift layout by using consistent spacing */
+.attachment-info [data-pbai-enhance="1"]:first-child,
+.media-sidebar [data-pbai-enhance="1"]:first-child,
+.attachment-details [data-pbai-enhance="1"]:first-child {
+    margin-top: 0;
+}
+
+/* Media modal specific adjustments */
+.media-modal .attachment-info {
+    position: relative;
+}
+
+.media-modal [data-pbai-enhance="1"] {
+    width: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* High DPI support */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 2dppx) {
+    [data-pbai-enhance="1"] {
+        box-shadow: 0 1px 0 rgba(120, 200, 230, 0.5) inset, 0 0.5px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    [data-pbai-enhance="1"]:hover {
+        box-shadow: 0 1px 0 rgba(120, 200, 230, 0.6) inset, 0 0.5px 0 rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* Responsive adjustments for smaller screens */
+@media screen and (max-width: 782px) {
+    [data-pbai-enhance="1"] {
+        padding: 8px 12px;
+        font-size: 14px;
+        min-height: 32px;
+    }
+}
