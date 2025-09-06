@@ -96,8 +96,77 @@ class Photobooster_Ai_Admin {
 		 * class.
 		 */
 
+
+		// Base admin script from the original plugin scaffold.
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/photobooster-ai-admin.js', array( 'jquery' ), $this->version, false );
 
+		// Register lightweight bootstrap for the media modal enhance feature.
+		$handle = $this->plugin_name . '-media-enhance-bootstrap';
+		wp_register_script(
+			$handle,
+			plugin_dir_url( __FILE__ ) . 'js/media-enhance-bootstrap.js',
+			array( 'jquery' ),
+			$this->version,
+			true
+		);
+
+		// Only expose data and enqueue for users who can upload files.
+		if ( current_user_can( 'upload_files' ) ) {
+			$localized = array(
+				'restBase'   => untrailingslashit( rest_url( 'photobooster-ai/v1' ) ),
+				'nonce'      => wp_create_nonce( 'wp_rest' ),
+				'canEnhance' => true,
+				'distUrl'    => $this->get_admin_dist_url(),
+				'manifest'   => $this->get_vite_manifest_map(),
+			);
+			wp_localize_script( $handle, 'PBAIEnhance', $localized );
+			wp_enqueue_script( $handle );
+		}
+
+	}
+
+	/**
+	 * Resolve the URL to the admin dist directory produced by Vite.
+	 *
+	 * @since 1.0.0
+	 * @return string
+	 */
+	private function get_admin_dist_url() {
+		return plugin_dir_url( __FILE__ ) . 'dist/';
+	}
+
+	/**
+	 * Resolve the absolute path to the admin dist directory.
+	 *
+	 * @since 1.0.0
+	 * @return string
+	 */
+	private function get_admin_dist_path() {
+		return plugin_dir_path( __FILE__ ) . 'dist/';
+	}
+
+	/**
+	 * Load and decode the Vite manifest.json from the admin dist directory.
+	 * Returns an associative array keyed by entries with their asset metadata.
+	 * If the manifest does not exist or is invalid, an empty array is returned.
+	 *
+	 * @since 1.0.0
+	 * @return array
+	 */
+	private function get_vite_manifest_map() {
+		$manifest_path = $this->get_admin_dist_path() . 'manifest.json';
+		if ( ! file_exists( $manifest_path ) ) {
+			return array();
+		}
+		$raw = file_get_contents( $manifest_path );
+		if ( false === $raw ) {
+			return array();
+		}
+		$decoded = json_decode( $raw, true );
+		if ( ! is_array( $decoded ) ) {
+			return array();
+		}
+		return $decoded;
 	}
 
 }

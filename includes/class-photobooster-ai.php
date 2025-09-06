@@ -112,6 +112,11 @@ class Photobooster_Ai {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-photobooster-ai-i18n.php';
 
 		/**
+		 * The class responsible for registering REST API routes for the plugin.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-photobooster-ai-rest.php';
+
+		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-photobooster-ai-admin.php';
@@ -156,6 +161,10 @@ class Photobooster_Ai {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+
+		// Register REST routes.
+		$plugin_rest = new Photobooster_Ai_REST();
+		$this->loader->add_action( 'rest_api_init', $plugin_rest, 'register_routes' );
 
 	}
 
