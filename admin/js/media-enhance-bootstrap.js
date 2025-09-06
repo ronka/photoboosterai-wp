@@ -105,38 +105,16 @@
     function getSelectedAttachment($modal) {
         console.log('getSelectedAttachment called');
 
-        // Method 1: Try to get from wp.media frame
-        if (window.wp && window.wp.media && window.wp.media.frame) {
+        // TODO: fix this
+        if (window._wpMediaGridSettings && window._wpMediaGridSettings.queryVars && window._wpMediaGridSettings.queryVars.item) {
             try {
-                var selection = window.wp.media.frame.state().get('selection');
-                if (selection && selection.length) {
-                    console.log('Found attachment via wp.media.frame:', selection.first());
-                    return selection.first();
-                }
+                return createAttachmentFromDOM($modal, window._wpMediaGridSettings.queryVars.item)
             } catch (e) {
-                console.log('wp.media.frame method failed:', e);
+                console.log('_wpMediaGridSettings.queryVars.item method failed:', e);
             }
         }
 
-        // Method 2: Try alternative wp.media approach
-        if (window.wp && window.wp.media && window.wp.media.frames) {
-            try {
-                for (var frameId in window.wp.media.frames) {
-                    var frame = window.wp.media.frames[frameId];
-                    if (frame && frame.state && frame.state().get) {
-                        var selection = frame.state().get('selection');
-                        if (selection && selection.length) {
-                            console.log('Found attachment via wp.media.frames:', selection.first());
-                            return selection.first();
-                        }
-                    }
-                }
-            } catch (e) {
-                console.log('wp.media.frames method failed:', e);
-            }
-        }
-
-        // Method 3: Parse from DOM - look for selected attachment ID
+        // Method 2: Parse from DOM - look for selected attachment ID
         if ($modal && $modal.length) {
             try {
                 console.log('Searching DOM for attachment...', $modal.get(0));
