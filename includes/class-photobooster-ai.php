@@ -117,9 +117,19 @@ class Photobooster_Ai {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-photobooster-ai-rest.php';
 
 		/**
+		 * The class responsible for encryption and decryption functionality.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-photobooster-ai-crypto.php';
+
+		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-photobooster-ai-admin.php';
+
+		/**
+		 * The class responsible for admin settings and API key management.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-photobooster-ai-settings.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
@@ -161,6 +171,9 @@ class Photobooster_Ai {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+
+		// Initialize settings management.
+		$plugin_settings = new Photobooster_Ai_Settings();
 
 		// Register REST routes.
 		$plugin_rest = new Photobooster_Ai_REST();

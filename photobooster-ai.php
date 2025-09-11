@@ -38,6 +38,19 @@ if ( ! defined( 'WPINC' ) ) {
 define( 'PHOTOBOOSTER_AI_VERSION', '1.0.0' );
 
 /**
+ * Default configuration constants.
+ */
+define( 'PHOTOBOOSTER_AI_DEFAULT_ENDPOINT', 'http://localhost:3000/api/generate-image' );
+define( 'PHOTOBOOSTER_AI_API_TIMEOUT', 60 );
+define( 'PHOTOBOOSTER_AI_SETTINGS_CAPABILITY', 'manage_options' );
+
+/**
+ * Security settings.
+ */
+define( 'PHOTOBOOSTER_AI_ENCRYPTION_METHOD', 'sodium' );
+define( 'PHOTOBOOSTER_AI_KEY_MIN_LENGTH', 32 );
+
+/**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-photobooster-ai-activator.php
  */
