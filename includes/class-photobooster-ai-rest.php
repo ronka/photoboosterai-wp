@@ -89,6 +89,9 @@ class Photobooster_Ai_REST
 	 */
 	public function route_generate_image($request)
 	{ // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
+		// Log the incoming request for debugging
+		error_log('PhotoBooster AI: Received generate-image request with params: ' . print_r($request->get_params(), true));
+
 		// Get sanitized parameters (already validated by route args)
 		$attachment_id = $request->get_param('attachment_id');
 		$style = $request->get_param('style');
@@ -97,6 +100,7 @@ class Photobooster_Ai_REST
 		// Validate attachment for processing
 		$validation_result = $this->validate_attachment_for_processing($attachment_id);
 		if (! $validation_result['valid']) {
+			error_log('PhotoBooster AI: Attachment validation failed for ID ' . $attachment_id . ': ' . $validation_result['error']);
 			return new WP_REST_Response(
 				array(
 					'success' => false,
@@ -122,9 +126,16 @@ class Photobooster_Ai_REST
 		error_log(sprintf('PhotoBooster AI: Starting image generation for attachment %d with style: %s', $attachment_id, $style));
 
 		try {
-			// Call NextJS API integration (to be implemented in next tasks)
-			$generated_image_data = $this->call_nextjs_api($file_path, $style, $additional_instructions);
+			// Call NextJS API integration
+			$api_result = $this->call_nextjs_api($file_path, $style, $additional_instructions);
 
+			// Check if API call returned an error
+			if (is_array($api_result) && isset($api_result['success']) && ! $api_result['success']) {
+				throw new Exception($api_result['error'] ?? 'Unknown API error');
+			}
+
+			// If successful, $api_result should be the base64 image data
+			$generated_image_data = $api_result;
 			if (! $generated_image_data) {
 				throw new Exception('Failed to generate image via NextJS API');
 			}
@@ -321,14 +332,22 @@ class Photobooster_Ai_REST
 		$image_contents = file_get_contents($file_path);
 		if (false === $image_contents) {
 			error_log('PhotoBooster AI: Failed to read image file: ' . $file_path);
-			return false;
+			return array(
+				'success' => false,
+				'error' => 'Failed to read image file',
+				'code' => 'file_read_error'
+			);
 		}
 
 		// Get image mime type
 		$image_info = getimagesize($file_path);
 		if (false === $image_info) {
 			error_log('PhotoBooster AI: Failed to get image info for: ' . $file_path);
-			return false;
+			return array(
+				'success' => false,
+				'error' => 'Failed to get image information',
+				'code' => 'image_info_error'
+			);
 		}
 		$mime_type = $image_info['mime'];
 
@@ -395,12 +414,20 @@ class Photobooster_Ai_REST
 
 		if (! $response_data || ! isset($response_data['success']) || ! $response_data['success']) {
 			error_log('PhotoBooster AI: NextJS API returned error: ' . ($response_data['error'] ?? 'Unknown error'));
-			return false;
+			return array(
+				'success' => false,
+				'error' => $response_data['error'] ?? 'Unknown API error',
+				'code' => 'api_response_error'
+			);
 		}
 
 		if (! isset($response_data['image'])) {
 			error_log('PhotoBooster AI: NextJS API response missing image data');
-			return false;
+			return array(
+				'success' => false,
+				'error' => 'API response missing image data',
+				'code' => 'missing_image_data'
+			);
 		}
 
 		return $response_data['image'];
