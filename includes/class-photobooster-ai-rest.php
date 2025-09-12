@@ -401,10 +401,11 @@ class Photobooster_Ai_REST
 		}
 
 		if (200 !== $response_code) {
-			error_log('PhotoBooster AI: NextJS API returned error code: ' . $response_code);
+			$error_message = $this->parse_api_error_response($response, $response_code);
+			error_log('PhotoBooster AI: NextJS API returned error code: ' . $response_code . ' - ' . $error_message);
 			return array(
 				'success' => false,
-				'error' => 'API returned error code: ' . $response_code,
+				'error' => $error_message,
 				'code' => 'api_error'
 			);
 		}
@@ -413,10 +414,16 @@ class Photobooster_Ai_REST
 		$response_data = json_decode($response_body, true);
 
 		if (! $response_data || ! isset($response_data['success']) || ! $response_data['success']) {
-			error_log('PhotoBooster AI: NextJS API returned error: ' . ($response_data['error'] ?? 'Unknown error'));
+			$error_message = 'Unknown API error';
+
+			if (isset($response_data['error'])) {
+				$error_message = $this->extract_readable_error($response_data['error']);
+			}
+
+			error_log('PhotoBooster AI: NextJS API returned error: ' . $error_message);
 			return array(
 				'success' => false,
-				'error' => $response_data['error'] ?? 'Unknown API error',
+				'error' => $error_message,
 				'code' => 'api_response_error'
 			);
 		}
@@ -591,6 +598,181 @@ class Photobooster_Ai_REST
 			'id'  => $attachment_id,
 			'url' => $attachment_url,
 		);
+	}
+
+	/**
+	 * Extract readable error message from nested JSON error structures.
+	 *
+	 * @param mixed $error_data Error data that might be nested JSON.
+	 * @return string Readable error message.
+	 */
+	private function extract_readable_error($error_data)
+	{
+		// If it's already a simple string, return it
+		if (is_string($error_data) && strpos($error_data, '{') !== 0) {
+			return $error_data;
+		}
+
+		// If it's a JSON string, try to decode it
+		if (is_string($error_data)) {
+			$decoded = json_decode($error_data, true);
+			if ($decoded && is_array($decoded)) {
+				$error_data = $decoded;
+			}
+		}
+
+		// If it's an array, look for error structures
+		if (is_array($error_data)) {
+			// Check for nested error object
+			if (isset($error_data['error'])) {
+				return $this->extract_readable_error($error_data['error']);
+			}
+
+			// Check for Google AI API error structure
+			if (isset($error_data['code'], $error_data['message'])) {
+				$code = $error_data['code'];
+				$message = $error_data['message'];
+
+				switch ($code) {
+					case 429:
+						if (strpos($message, 'quota') !== false) {
+							return 'Google AI API quota exceeded. Please wait a few minutes and try again, or upgrade your Google AI API plan for higher limits.';
+						}
+						return 'Rate limit exceeded. Please wait a moment and try again.';
+
+					case 401:
+						return 'Google AI API authentication failed. Please check your Google AI API key.';
+
+					case 403:
+						return 'Access denied. Please check your Google AI API permissions.';
+
+					case 400:
+						return 'Invalid request. Please contact support if this persists.';
+
+					default:
+						return 'API error: ' . $message;
+				}
+			}
+
+			// Check for message field
+			if (isset($error_data['message'])) {
+				return $error_data['message'];
+			}
+		}
+
+		// Fallback for complex structures
+		return 'An error occurred while processing your request. Please try again later.';
+	}
+
+	/**
+	 * Parse complex API error responses into user-friendly messages.
+	 *
+	 * @param array|WP_Error $response HTTP response object.
+	 * @param int $response_code HTTP response code.
+	 * @return string User-friendly error message.
+	 */
+	private function parse_api_error_response($response, $response_code)
+	{
+		// Default error message
+		$default_message = 'API request failed with code: ' . $response_code;
+
+		// Get response body
+		$response_body = wp_remote_retrieve_body($response);
+		if (empty($response_body)) {
+			return $default_message;
+		}
+
+		// Try to parse JSON response
+		$response_data = json_decode($response_body, true);
+		if (!$response_data) {
+			return $default_message;
+		}
+
+		// Check for nested error structure
+		if (isset($response_data['error'])) {
+			$error_content = $response_data['error'];
+
+			// If error is a JSON string, decode it
+			if (is_string($error_content)) {
+				$nested_error = json_decode($error_content, true);
+				if ($nested_error && isset($nested_error['error'])) {
+					$error_content = $nested_error['error'];
+				}
+			}
+
+			// Handle Google AI API quota errors
+			if (is_array($error_content) && isset($error_content['code'], $error_content['message'])) {
+				$error_code = $error_content['code'];
+				$error_message = $error_content['message'];
+
+				switch ($error_code) {
+					case 429:
+						if (strpos($error_message, 'quota') !== false) {
+							return 'Google AI API quota exceeded. Please wait a few minutes and try again, or upgrade your Google AI API plan.';
+						}
+						return 'Too many requests. Please wait a moment and try again.';
+
+					case 401:
+						return 'Google AI API authentication failed. Please check your Google AI API key configuration.';
+
+					case 403:
+						return 'Access denied. Please check your Google AI API permissions.';
+
+					case 400:
+						return 'Invalid request format. Please contact support if this persists.';
+
+					default:
+						return 'Google AI API error: ' . $error_message;
+				}
+			}
+
+			// Handle string error messages
+			if (is_string($error_content)) {
+				return $error_content;
+			}
+		}
+
+		// Check for Clerk authentication errors in headers
+		$headers = wp_remote_retrieve_headers($response);
+		if (isset($headers['x-clerk-auth-reason'])) {
+			$auth_reason = $headers['x-clerk-auth-reason'];
+			$auth_message = isset($headers['x-clerk-auth-message']) ? $headers['x-clerk-auth-message'] : '';
+
+			switch ($auth_reason) {
+				case 'token-invalid':
+					return 'Authentication error: Invalid API key format. Please check your API key configuration.';
+				case 'token-expired':
+					return 'Authentication error: API key has expired. Please generate a new API key.';
+				case 'session-revoked':
+					return 'Authentication error: API key has been revoked. Please generate a new API key.';
+				default:
+					return 'Authentication error: ' . $auth_message;
+			}
+		}
+
+		// Handle common HTTP error codes
+		switch ($response_code) {
+			case 400:
+				return 'Bad request. Please check your input parameters.';
+			case 401:
+				return 'Authentication failed. Please check your API key.';
+			case 403:
+				return 'Access forbidden. Please check your API key permissions.';
+			case 404:
+				return 'API endpoint not found. Please check your configuration.';
+			case 429:
+				return 'Rate limit exceeded. Please wait a moment and try again.';
+			case 500:
+				return 'Server error. Please try again later or contact support.';
+			case 502:
+				return 'Bad gateway. The API service may be temporarily unavailable.';
+			case 503:
+				return 'Service unavailable. Please try again later.';
+			case 504:
+				return 'Gateway timeout. The request took too long to process.';
+			default:
+				return $default_message;
+		}
 	}
 
 	/**
