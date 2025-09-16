@@ -27,7 +27,8 @@
  * @subpackage Photobooster_Ai/includes
  * @author     PhotoBooster AI <PhotoBoosterai@gmail.com>
  */
-class Photobooster_Ai {
+class Photobooster_Ai
+{
 
 	/**
 	 * The loader that's responsible for maintaining and registering all hooks that power
@@ -66,8 +67,9 @@ class Photobooster_Ai {
 	 *
 	 * @since    1.0.0
 	 */
-	public function __construct() {
-		if ( defined( 'PHOTOBOOSTER_AI_VERSION' ) ) {
+	public function __construct()
+	{
+		if (defined('PHOTOBOOSTER_AI_VERSION')) {
 			$this->version = PHOTOBOOSTER_AI_VERSION;
 		} else {
 			$this->version = '1.0.0';
@@ -78,7 +80,6 @@ class Photobooster_Ai {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
-
 	}
 
 	/**
@@ -97,48 +98,48 @@ class Photobooster_Ai {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function load_dependencies() {
+	private function load_dependencies()
+	{
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-photobooster-ai-loader.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-photobooster-ai-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-photobooster-ai-i18n.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-photobooster-ai-i18n.php';
 
 		/**
 		 * The class responsible for registering REST API routes for the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-photobooster-ai-rest.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-photobooster-ai-rest.php';
 
 		/**
 		 * The class responsible for encryption and decryption functionality.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-photobooster-ai-crypto.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'includes/class-photobooster-ai-crypto.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-photobooster-ai-admin.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-photobooster-ai-admin.php';
 
 		/**
 		 * The class responsible for admin settings and API key management.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-photobooster-ai-settings.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'admin/class-photobooster-ai-settings.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-photobooster-ai-public.php';
+		require_once plugin_dir_path(dirname(__FILE__)) . 'public/class-photobooster-ai-public.php';
 
 		$this->loader = new Photobooster_Ai_Loader();
-
 	}
 
 	/**
@@ -150,12 +151,12 @@ class Photobooster_Ai {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function set_locale() {
+	private function set_locale()
+	{
 
 		$plugin_i18n = new Photobooster_Ai_i18n();
 
-		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
-
+		$this->loader->add_action('plugins_loaded', $plugin_i18n, 'load_plugin_textdomain');
 	}
 
 	/**
@@ -165,20 +166,23 @@ class Photobooster_Ai {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_admin_hooks() {
+	private function define_admin_hooks()
+	{
 
-		$plugin_admin = new Photobooster_Ai_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Photobooster_Ai_Admin($this->get_plugin_name(), $this->get_version());
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
+		$this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
+
+		// Add AI Enhance button to WooCommerce product image area
+		$this->loader->add_action('admin_footer', $plugin_admin, 'inject_product_image_enhance_button');
 
 		// Initialize settings management.
 		$plugin_settings = new Photobooster_Ai_Settings();
 
 		// Register REST routes.
 		$plugin_rest = new Photobooster_Ai_REST();
-		$this->loader->add_action( 'rest_api_init', $plugin_rest, 'register_routes' );
-
+		$this->loader->add_action('rest_api_init', $plugin_rest, 'register_routes');
 	}
 
 	/**
@@ -188,13 +192,13 @@ class Photobooster_Ai {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_public_hooks() {
+	private function define_public_hooks()
+	{
 
-		$plugin_public = new Photobooster_Ai_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Photobooster_Ai_Public($this->get_plugin_name(), $this->get_version());
 
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
+		$this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
 	}
 
 	/**
@@ -202,7 +206,8 @@ class Photobooster_Ai {
 	 *
 	 * @since    1.0.0
 	 */
-	public function run() {
+	public function run()
+	{
 		$this->loader->run();
 	}
 
@@ -213,7 +218,8 @@ class Photobooster_Ai {
 	 * @since     1.0.0
 	 * @return    string    The name of the plugin.
 	 */
-	public function get_plugin_name() {
+	public function get_plugin_name()
+	{
 		return $this->plugin_name;
 	}
 
@@ -223,7 +229,8 @@ class Photobooster_Ai {
 	 * @since     1.0.0
 	 * @return    Photobooster_Ai_Loader    Orchestrates the hooks of the plugin.
 	 */
-	public function get_loader() {
+	public function get_loader()
+	{
 		return $this->loader;
 	}
 
@@ -233,8 +240,8 @@ class Photobooster_Ai {
 	 * @since     1.0.0
 	 * @return    string    The version number of the plugin.
 	 */
-	public function get_version() {
+	public function get_version()
+	{
 		return $this->version;
 	}
-
 }
