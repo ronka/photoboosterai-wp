@@ -463,86 +463,40 @@
         }
     }
 
-    function observeMediaModal() {
-        var observer = new MutationObserver(function (mutations) {
-            mutations.forEach(function (m) {
-                Array.prototype.forEach.call(m.addedNodes || [], function (node) {
-                    if (!(node instanceof HTMLElement)) return;
-                    if (node.classList && (node.classList.contains('media-modal') || node.classList.contains('attachments-browser') || node.classList.contains('media-frame'))) {
-                        console.log('New container detected:', node.className);
-                        var $node = $(node);
-                        injectOrUpdateButton($node);
-                        attachPerContainerObservers(node, $node);
-                    }
-                });
-            });
+    function listenForMediaModalTriggers() {
+        console.log('Setting up click listeners for media modal triggers...');
+
+        // Listen for clicks on attachment previews and set post thumbnail button
+        $(document).on('click', '.attachment-preview', function (e) {
+            console.log('Media modal trigger clicked:', this.className || this.id);
+
+            // Wait a moment for the modal to be created and populated
+            setTimeout(function () {
+                // Find the media modal that was opened
+                var $modal = $('.media-modal:visible, .media-frame:visible').last();
+                console.log('setTimeout: Modal injected:', $modal.length);
+                if ($modal.length) {
+                    console.log('Found opened modal:', $modal.get(0));
+                    injectOrUpdateButton($modal);
+                }
+            }, 500);
         });
-        observer.observe(document.body, { childList: true, subtree: true });
     }
 
-    function attachPerContainerObservers(node, $node) {
-        var innerObs = new MutationObserver(function () {
-            // Re-evaluate button presence and eligibility on selection changes
-            injectOrUpdateButton($node);
-        });
-        innerObs.observe(node, { childList: true, subtree: true });
-
-        // Listen for wp.media selection changes
-        if (window.wp && window.wp.media && window.wp.media.frame) {
-            var frame = window.wp.media.frame;
-            if (frame.on) {
-                frame.on('selection:single selection:toggle', function () {
-                    setTimeout(function () {
-                        injectOrUpdateButton($node);
-                    }, 50);
-                });
-            }
-        }
-
-        // Cleanup on close for modal variant
-        if (node.classList && node.classList.contains('media-modal')) {
-            $node.on('click', '.media-modal-close, .media-modal-backdrop', function () {
-                unmountAppFromModal(node);
-                $node.find('[data-pbai-enhance="1"]').remove();
-            });
-        }
-
-        // Listen for when media frame closes completely
-        if (window.wp && window.wp.media && window.wp.media.frame) {
-            var frame = window.wp.media.frame;
-            if (frame.on) {
-                frame.on('close', function () {
-                    $node.find('[data-pbai-enhance="1"]').remove();
-                    unmountAppFromModal(node);
-                });
-            }
-        }
-    }
 
     $(function () {
         console.log('PhotoBooster AI bootstrap initializing...');
         if (!isMediaScreen()) return;
 
-        // Observe future containers
-        observeMediaModal();
+        // Set up click listeners for media modal triggers
+        listenForMediaModalTriggers();
 
-        // Initialize for any already-present containers
-        $('.media-modal, .attachments-browser, .media-frame').each(function () {
-            console.log('Found existing container:', this.className);
+        // Initialize for any already-present containers (in case modal is already open)
+        $('.media-modal:visible, .attachments-browser:visible, .media-frame:visible').each(function () {
+            console.log('Found existing visible container:', this.className);
             var $m = $(this);
             injectOrUpdateButton($m);
-            attachPerContainerObservers(this, $m);
         });
-
-        // Force inject into any media-related container as fallback
-        setTimeout(function () {
-            $('.media-sidebar, .attachment-info, .attachment-details').each(function () {
-                if ($(this).find('[data-pbai-enhance="1"]').length === 0) {
-                    console.log('Fallback injection into:', this.className);
-                    injectOrUpdateButton($(this).closest('.media-frame, .media-modal, body'));
-                }
-            });
-        }, 500);
     });
 
 })(jQuery);
