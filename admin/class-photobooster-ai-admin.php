@@ -437,7 +437,7 @@ class Photobooster_Ai_Admin
 						}
 					});
 
-					$('#postimagediv .inside').append(enhanceBtn);
+					$('#postimagediv .inside').append($('<p>').append(enhanceBtn));
 					console.log('AI Enhance button injected into product image area');
 				}
 			});
