@@ -1,0 +1,66 @@
+/* PhotoBooster AI Responsive Styles */
+
+/* Tablet breakpoint */
+@media (max-width: 768px) {
+    .pbai-overlay .pbai-modal {
+        max-width: 95vw;
+        max-height: 95vh;
+    }
+
+    .pbai-overlay .pbai-main-content {
+        flex-direction: column;
+    }
+
+    .pbai-overlay .pbai-left-panel {
+        flex: none;
+        border-right: none;
+        border-bottom: 1px solid #e1e5e9;
+    }
+
+    .pbai-overlay .pbai-photos-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+
+    /* Image popup responsive */
+    .pbai-image-popup-overlay {
+        padding: 10px;
+    }
+
+    .pbai-image-popup-overlay .pbai-image-popup-modal {
+        max-width: 95vw;
+        max-height: 95vh;
+    }
+
+    .pbai-image-popup-overlay .pbai-image-popup-image {
+        max-height: 70vh;
+    }
+
+    .pbai-image-popup-overlay .pbai-image-popup-close {
+        top: 5px;
+        right: 5px;
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+}
+
+/* Mobile breakpoint */
+@media (max-width: 480px) {
+    .pbai-overlay {
+        padding: 10px;
+    }
+
+    .pbai-overlay .pbai-header {
+        padding: 15px;
+    }
+
+    .pbai-overlay .pbai-left-panel,
+    .pbai-overlay .pbai-right-panel {
+        padding: 15px;
+    }
+
+    .pbai-overlay .pbai-placeholder-image {
+        width: 150px;
+        height: 100px;
+    }
+}

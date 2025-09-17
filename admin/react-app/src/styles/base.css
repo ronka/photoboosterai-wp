@@ -1,0 +1,66 @@
+/* PhotoBooster AI Base Styles */
+.pbai-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100000;
+    padding: 20px;
+}
+
+/* Base text styles */
+.pbai-overlay a {
+    font-weight: 500;
+    color: #646cff;
+    text-decoration: inherit;
+}
+
+.pbai-overlay a:hover {
+    color: #535bf2;
+}
+
+.pbai-overlay h1 {
+    font-size: 3.2em;
+    line-height: 1.1;
+}
+
+.pbai-overlay h2 {
+    margin: 0;
+    color: #23282d;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.pbai-overlay h3 {
+    margin: 0 0 15px 0;
+    color: #23282d;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.pbai-overlay p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Universal box-sizing */
+.pbai-modal * {
+    box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: light) {
+    .pbai-overlay {
+        color: #213547;
+        background-color: rgba(255, 255, 255, 0.8);
+    }
+
+    .pbai-overlay a:hover {
+        color: #747bff;
+    }
+}

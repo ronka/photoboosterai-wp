@@ -1,0 +1,99 @@
+/* PhotoBooster AI Form Elements */
+
+.pbai-form-group {
+    margin-bottom: 20px;
+}
+
+.pbai-form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #23282d;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Select elements */
+.pbai-select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    background: white;
+    color: #23282d;
+    cursor: pointer;
+}
+
+.pbai-select:focus {
+    outline: none;
+    border-color: #0073aa;
+    box-shadow: 0 0 0 1px #0073aa;
+}
+
+/* Textarea elements */
+.pbai-textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+}
+
+.pbai-textarea:focus {
+    outline: none;
+    border-color: #0073aa;
+    box-shadow: 0 0 0 1px #0073aa;
+}
+
+.pbai-textarea::placeholder {
+    color: #999;
+}
+
+/* Seed image section */
+.pbai-seed-image-container {
+    background: white;
+    border-radius: 6px;
+    padding: 15px;
+    border: 1px solid #e1e5e9;
+}
+
+.pbai-seed-image-wrapper {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.pbai-seed-image {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pbai-no-seed-image {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.pbai-placeholder-image {
+    width: 200px;
+    height: 150px;
+    background: #f8f9fa;
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 32px;
+    color: #999;
+}
+
+.pbai-seed-label {
+    margin: 10px 0;
+    color: #666;
+    font-size: 14px;
+    text-align: center;
+}
