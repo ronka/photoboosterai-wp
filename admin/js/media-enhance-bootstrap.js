@@ -1,267 +1,275 @@
+/**
+ * PhotoBooster AI Media Enhancement Bootstrap
+ * 
+ * This file handles the integration of AI enhancement functionality into WordPress media modals.
+ * It provides button injection, asset loading, and React app mounting for image enhancement.
+ * 
+ * @author PhotoBooster AI
+ * @version 1.0.0
+ */
 (function ($) {
     'use strict';
 
+    // =============================================================================
+    // CONSTANTS
+    // =============================================================================
+
+    /** @constant {string} Root element ID for React app mounting */
+    const MOUNT_ROOT_ID = 'pbai-enhance-root';
+
+    /** @constant {string} Data attribute for AI enhance buttons */
+    const ENHANCE_BUTTON_ATTR = 'data-pbai-enhance';
+
+    /** @constant {string} Data attribute for injected CSS links */
+    const CSS_DATA_ATTR = 'data-pbai-css';
+
+    /** @constant {string} Button text for AI enhance functionality */
+    const BUTTON_TEXT = '✨ AI Enhance';
+
+    /** @constant {string} Custom event name for closing React app */
+    const CLOSE_EVENT_NAME = 'pbai:close';
+
+    /** @constant {number} Delay for DOM operations to complete (ms) */
+    const DOM_OPERATION_DELAY = 100;
+
+    /** @constant {number} Z-index for React app overlay */
+    const OVERLAY_Z_INDEX = '100000';
+
+    /** @constant {Array<string>} Supported image MIME types */
+    const ELIGIBLE_MIME_TYPES = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/webp'
+    ];
+
+    /** @constant {string} Primary manifest entry key */
+    const MANIFEST_ENTRY_KEY = 'src/mount.tsx';
+
+    /** @constant {Object} Fallback asset file mappings */
+    const FALLBACK_ASSET_MAP = {
+        'src/mount.tsx': {
+            file: 'assets/mount-BwCMH1AE.js',
+            css: ['assets/mount-16kd5VZX.css']
+        },
+        'mount.tsx': {
+            file: 'assets/mount-BwCMH1AE.js',
+            css: ['assets/mount-16kd5VZX.css']
+        }
+    };
+
+    /** @constant {Object} Asset file candidate patterns */
+    const ASSET_CANDIDATES = {
+        js: [
+            'assets/mount-BwCMH1AE.js',
+            'assets/mount.js',
+            'mount.js'
+        ],
+        css: [
+            'assets/mount-16kd5VZX.css',
+            'assets/mount.css',
+            'mount.css'
+        ]
+    };
+
+    /** @constant {Object} DOM selectors for various elements */
+    const SELECTORS = {
+        // Modal containers
+        visibleModals: '.media-modal:visible, .media-frame:visible',
+        existingContainers: '.media-modal:visible, .attachments-browser:visible, .media-frame:visible',
+
+        // Button targets
+        attachmentInfo: '.attachment-info:visible',
+        mediaSidebar: '.media-sidebar:visible',
+        attachmentDetails: '.attachment-details:visible',
+
+        // Attachment selection
+        selectedAttachment: '.attachment.selected, .attachment.details, .attachment-details',
+        elementsWithDataId: '[data-id]',
+
+        // Attachment metadata
+        filename: '.filename, .media-sidebar .filename strong, .attachment-details .filename',
+        title: '.title, .media-sidebar .title, .attachment-details .title, input[name="title"]',
+        image: '.details-image img, .attachment-preview img, .thumbnail img, img',
+        fullSizeLinks: 'a[href*=".jpg"], a[href*=".jpeg"], a[href*=".png"], a[href*=".webp"]',
+        editLinks: 'a[href*="post.php?post="], a[href*="edit.php?post="]',
+        altText: 'input[name="alt"], [name="alt"]',
+
+        // Event targets
+        attachmentPreview: '.attachment-preview',
+
+        // Button selector
+        enhanceButton: '[' + ENHANCE_BUTTON_ATTR + '="1"]'
+    };
+
+    /** @constant {Object} Regular expressions for various matching operations */
+    const REGEX_PATTERNS = {
+        numericId: /^\d+$/,
+        postId: /post=(\d+)/,
+        jpegExtension: /\.jpe?g$/i,
+        pngExtension: /\.png$/i,
+        webpExtension: /\.webp$/i,
+        attachmentIdPrefix: /^attachment-/
+    };
+
+    /** @constant {Object} User-facing error messages */
+    const ERROR_MESSAGES = {
+        appNotBuilt: 'AI Enhance app is not built yet. Check console for details.',
+        mountFunctionMissing: 'React app loaded but mountApp function missing.',
+        invalidImageSelected: 'Please select a valid image file (JPEG, PNG, or WebP).',
+        loadFailed: 'Failed to load AI Enhance app. Check console for details.'
+    };
+
+    // =============================================================================
+    // UTILITY FUNCTIONS
+    // =============================================================================
+
+    /**
+     * Checks if current screen allows media modal functionality
+     * @returns {boolean} Always returns true for maximum compatibility
+     */
     function isMediaScreen() {
-        // Allow on any admin screen where media modal can appear (post editor, etc.)
         return true;
     }
 
-    function getManifestEntry(key) {
-        var map = (window.PBAIEnhance && window.PBAIEnhance.manifest) || {};
-        console.log('Manifest map:', map);
-        console.log('Looking for key:', key);
-
-        var entry = map[key];
-        if (entry) {
-            console.log('Found manifest entry:', entry);
-            return entry;
-        }
-
-        console.log('No manifest entry found, trying fallback...');
-        // Fallback: try to find the built files directly
-        return getFallbackEntry(key);
-    }
-
-    function getFallbackEntry(key) {
-        console.log('Getting fallback entry for:', key);
-
-        // Map of expected entries to likely filenames
-        var fallbackMap = {
-            'src/mount.tsx': {
-                file: 'assets/mount-BwCMH1AE.js',
-                css: ['assets/mount-16kd5VZX.css']
-            },
-            'mount.tsx': {
-                file: 'assets/mount-BwCMH1AE.js',
-                css: ['assets/mount-16kd5VZX.css']
-            }
-        };
-
-        var entry = fallbackMap[key];
-        if (entry) {
-            console.log('Found fallback entry:', entry);
-            return entry;
-        }
-
-        // Try to auto-detect from available files
-        if (key.includes('mount')) {
-            // Look for mount-related files
-            var mountJs = findAssetFile('mount', 'js');
-            var mountCss = findAssetFile('mount', 'css');
-
-            if (mountJs) {
-                var detectedEntry = {
-                    file: mountJs,
-                    css: mountCss ? [mountCss] : []
-                };
-                console.log('Auto-detected entry:', detectedEntry);
-                return detectedEntry;
-            }
-        }
-
-        console.log('No fallback found');
-        return null;
-    }
-
-    function findAssetFile(name, type) {
-        // This is a simple heuristic - in production you'd want to make this more robust
-        var distUrl = getDistUrl();
-        var baseUrl = distUrl.replace(/\/$/, '');
-
-        if (type === 'js') {
-            // Try common patterns for the mount JS file
-            var candidates = [
-                'assets/mount-BwCMH1AE.js',
-                'assets/mount.js',
-                'mount.js'
-            ];
-        } else if (type === 'css') {
-            var candidates = [
-                'assets/mount-16kd5VZX.css',
-                'assets/mount.css',
-                'mount.css'
-            ];
-        }
-
-        // For now, return the first candidate (in production, you'd check if file exists)
-        return candidates[0];
-    }
-
+    /**
+     * Gets the distribution URL for assets from global configuration
+     * @returns {string} Distribution URL or empty string if not available
+     */
     function getDistUrl() {
         return (window.PBAIEnhance && window.PBAIEnhance.distUrl) || '';
     }
 
+    /**
+     * Checks if selected attachment is an eligible image type
+     * @param {Object|null} selectedAttachment - The attachment object to check
+     * @returns {boolean} True if attachment is an eligible image
+     */
     function eligibleImageSelected(selectedAttachment) {
-        if (!selectedAttachment) return false;
+        if (!selectedAttachment) {
+            return false;
+        }
 
-        var mime = selectedAttachment.get ? selectedAttachment.get('mime') :
+        const mime = selectedAttachment.get ?
+            selectedAttachment.get('mime') :
             selectedAttachment.mime || selectedAttachment.subtype || '';
 
-        // Check for eligible image MIME types
-        var eligibleMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-        return eligibleMimes.indexOf(mime) !== -1;
+        return ELIGIBLE_MIME_TYPES.indexOf(mime) !== -1;
     }
 
-    function getSelectedAttachment($modal) {
-        console.log('getSelectedAttachment called');
+    /**
+     * Detects MIME type from filename or URL
+     * @param {string} testUrl - Filename or URL to analyze
+     * @returns {string} Detected MIME type or empty string
+     */
+    function detectMimeType(testUrl) {
+        if (REGEX_PATTERNS.jpegExtension.test(testUrl)) return 'image/jpeg';
+        if (REGEX_PATTERNS.pngExtension.test(testUrl)) return 'image/png';
+        if (REGEX_PATTERNS.webpExtension.test(testUrl)) return 'image/webp';
+        return '';
+    }
 
-        // TODO: fix this
-        if (window._wpMediaGridSettings && window._wpMediaGridSettings.queryVars && window._wpMediaGridSettings.queryVars.item) {
-            try {
-                return createAttachmentFromDOM($modal, window._wpMediaGridSettings.queryVars.item)
-            } catch (e) {
-                console.log('_wpMediaGridSettings.queryVars.item method failed:', e);
+    /**
+     * Safely extracts text content from jQuery element
+     * @param {jQuery} $element - jQuery element to extract text from
+     * @returns {string} Trimmed text content or empty string
+     */
+    function extractText($element) {
+        return $element.length ? $element.text().trim() : '';
+    }
+
+    /**
+     * Safely extracts value from input element or text from other elements
+     * @param {jQuery} $element - jQuery element to extract value/text from
+     * @returns {string} Element value/text or empty string
+     */
+    function extractValue($element) {
+        if (!$element.length) return '';
+        return $element.is('input') ? ($element.val() || '') : extractText($element);
+    }
+
+    // =============================================================================
+    // ASSET MANAGEMENT
+    // =============================================================================
+
+    /**
+     * Retrieves manifest entry from global configuration or falls back to detection
+     * @param {string} key - The manifest entry key to look up
+     * @returns {Object|null} Manifest entry object or null if not found
+     */
+    function getManifestEntry(key) {
+        const map = (window.PBAIEnhance && window.PBAIEnhance.manifest) || {};
+        const entry = map[key];
+
+        if (entry) {
+            return entry;
+        }
+
+        return getFallbackEntry(key);
+    }
+
+    /**
+     * Gets fallback entry when manifest lookup fails
+     * @param {string} key - The entry key to find fallback for
+     * @returns {Object|null} Fallback entry object or null if not found
+     */
+    function getFallbackEntry(key) {
+        const entry = FALLBACK_ASSET_MAP[key];
+        if (entry) {
+            return entry;
+        }
+
+        if (key.includes('mount')) {
+            const mountJs = findAssetFile('mount', 'js');
+            const mountCss = findAssetFile('mount', 'css');
+
+            if (mountJs) {
+                return {
+                    file: mountJs,
+                    css: mountCss ? [mountCss] : []
+                };
             }
         }
 
-        // Method 2: Parse from DOM - look for selected attachment ID
-        if ($modal && $modal.length) {
-            try {
-                console.log('Searching DOM for attachment...', $modal.get(0));
-
-                // Look for attachment ID in various places
-                var $selected = $modal.find('.attachment.selected, .attachment.details, .attachment-details');
-                console.log('Found selected elements:', $selected.length);
-
-                if ($selected.length) {
-                    var attachmentId = $selected.attr('data-id') || $selected.data('id');
-                    if (attachmentId) {
-                        console.log('Found attachment ID from DOM:', attachmentId);
-                        return createAttachmentFromDOM($modal, attachmentId);
-                    }
-                }
-
-                // Look for data-id on any element
-                var $withDataId = $modal.find('[data-id]');
-                console.log('Elements with data-id:', $withDataId.length);
-                if ($withDataId.length) {
-                    var attachmentId = $withDataId.first().attr('data-id');
-                    if (attachmentId && /^\d+$/.test(attachmentId)) {
-                        console.log('Found attachment ID from data-id:', attachmentId);
-                        return createAttachmentFromDOM($modal, attachmentId);
-                    }
-                }
-
-                // Look in attachment details for edit link
-                var $details = $modal.find('.attachment-details, .media-sidebar');
-                if ($details.length) {
-                    var $link = $details.find('a[href*="post.php?post="], a[href*="edit.php?post="]').first();
-                    if ($link.length) {
-                        var href = $link.attr('href');
-                        var match = href.match(/post=(\d+)/);
-                        if (match) {
-                            var attachmentId = match[1];
-                            console.log('Found attachment ID from details link:', attachmentId);
-                            return createAttachmentFromDOM($modal, attachmentId);
-                        }
-                    }
-                }
-
-                // Look for attachment ID in URL fragments or other attributes
-                var allElements = $modal.find('*');
-                for (var i = 0; i < allElements.length; i++) {
-                    var el = allElements[i];
-                    var id = el.getAttribute('id');
-                    if (id && id.indexOf('attachment-') === 0) {
-                        var attachmentId = id.replace('attachment-', '');
-                        if (/^\d+$/.test(attachmentId)) {
-                            console.log('Found attachment ID from element ID:', attachmentId);
-                            return createAttachmentFromDOM($modal, attachmentId);
-                        }
-                    }
-                }
-
-            } catch (e) {
-                console.log('DOM parsing method failed:', e);
-            }
-        }
-
-        console.log('No attachment found');
         return null;
     }
 
-    function createAttachmentFromDOM($modal, attachmentId) {
-        try {
-            console.log('Creating attachment from DOM for ID:', attachmentId);
-
-            // Extract what we can from the DOM
-            var $filename = $modal.find('.filename, .media-sidebar .filename strong, .attachment-details .filename').first();
-            var filename = $filename.text().trim() || '';
-            console.log('Found filename:', filename);
-
-            var $title = $modal.find('.title, .media-sidebar .title, .attachment-details .title, input[name="title"]').first();
-            var title = '';
-            if ($title.is('input')) {
-                title = $title.val() || '';
-            } else {
-                title = $title.text().trim() || '';
-            }
-            title = title || filename;
-            console.log('Found title:', title);
-
-            // Try to get the image src from multiple possible locations
-            var $img = $modal.find('.details-image img, .attachment-preview img, .thumbnail img, img').first();
-            var url = $img.attr('src') || $img.attr('data-src') || '';
-            console.log('Found image URL:', url);
-
-            // Look for full-size URL
-            var $fullLink = $modal.find('a[href*=".jpg"], a[href*=".jpeg"], a[href*=".png"], a[href*=".webp"]').first();
-            var fullUrl = $fullLink.attr('href') || url;
-
-            // Guess MIME type from filename or URL
-            var mime = '';
-            var testUrl = filename || url;
-            if (testUrl.match(/\.jpe?g$/i)) mime = 'image/jpeg';
-            else if (testUrl.match(/\.png$/i)) mime = 'image/png';
-            else if (testUrl.match(/\.webp$/i)) mime = 'image/webp';
-            console.log('Detected MIME type:', mime);
-
-            // Try to extract additional metadata
-            var $alt = $modal.find('input[name="alt"], [name="alt"]').first();
-            var alt = $alt.is('input') ? $alt.val() : $alt.text();
-
-            var attachment = {
-                id: parseInt(attachmentId, 10),
-                title: title,
-                filename: filename,
-                url: fullUrl || url,
-                mime: mime,
-                alt: alt || '',
-                sizes: url ? {
-                    full: { url: fullUrl || url },
-                    large: { url: url },
-                    medium: { url: url },
-                    thumbnail: { url: url }
-                } : {},
-                // Add get method for compatibility
-                get: function (key) {
-                    return this[key];
-                }
-            };
-
-            console.log('Created attachment from DOM:', attachment);
-            return attachment;
-        } catch (e) {
-            console.log('Error creating attachment from DOM:', e);
-            return null;
-        }
+    /**
+     * Finds asset file using predefined candidate patterns
+     * @param {string} name - Asset name to search for
+     * @param {string} type - Asset type ('js' or 'css')
+     * @returns {string|null} First matching candidate or null
+     */
+    function findAssetFile(name, type) {
+        const candidates = ASSET_CANDIDATES[type];
+        return candidates ? candidates[0] : null;
     }
 
+    /**
+     * Injects CSS stylesheets from manifest entry and its imports
+     * @param {Object} entry - Manifest entry containing CSS files
+     */
     function ensureStyleInjected(entry) {
-        var manifest = (window.PBAIEnhance && window.PBAIEnhance.manifest) || {};
+        const manifest = (window.PBAIEnhance && window.PBAIEnhance.manifest) || {};
 
-        // Function to inject CSS from a single entry
+        /**
+         * Injects CSS files from a single manifest entry
+         * @param {Object} entryToCheck - Entry object to check for CSS
+         */
         function injectCssFromEntry(entryToCheck) {
             if (!entryToCheck || !entryToCheck.css) return;
-            (entryToCheck.css || []).forEach(function (css) {
-                var href = getDistUrl() + css;
-                if (document.querySelector('link[data-pbai-css="' + href + '"]')) return;
-                var link = document.createElement('link');
+
+            entryToCheck.css.forEach(function (css) {
+                const href = getDistUrl() + css;
+                const existingLink = document.querySelector(`link[${CSS_DATA_ATTR}="${href}"]`);
+
+                if (existingLink) return;
+
+                const link = document.createElement('link');
                 link.rel = 'stylesheet';
                 link.href = href;
-                link.setAttribute('data-pbai-css', href);
+                link.setAttribute(CSS_DATA_ATTR, href);
                 document.head.appendChild(link);
-                console.log('Injected CSS:', href);
             });
         }
 
@@ -271,77 +279,258 @@
         // Also inject CSS from imported chunks
         if (entry && entry.imports) {
             entry.imports.forEach(function (importKey) {
-                var importedEntry = manifest[importKey];
+                const importedEntry = manifest[importKey];
                 if (importedEntry) {
-                    console.log('Checking imported entry for CSS:', importKey, importedEntry);
                     injectCssFromEntry(importedEntry);
                 }
             });
         }
+
+        // Manual fallback: inject App CSS directly from all manifest entries
+        Object.keys(manifest).forEach(function (key) {
+            const manifestEntry = manifest[key];
+            if (manifestEntry.css && manifestEntry.css.length > 0) {
+                injectCssFromEntry(manifestEntry);
+            }
+        });
     }
 
+    // =============================================================================
+    // DOM MANIPULATION
+    // =============================================================================
+
+    /**
+     * Finds and returns target element for button injection in modal
+     * @param {jQuery} $modal - Modal jQuery object
+     * @returns {jQuery} Target element or empty jQuery object
+     */
+    function findButtonTarget($modal) {
+        let $target = $modal.find(SELECTORS.attachmentInfo).first();
+        if (!$target.length) {
+            $target = $modal.find(SELECTORS.mediaSidebar).first();
+        }
+        if (!$target.length) {
+            $target = $modal.find(SELECTORS.attachmentDetails).first();
+        }
+        return $target;
+    }
+
+    /**
+     * Extracts attachment ID from WordPress global settings
+     * @param {jQuery} $modal - Modal jQuery object (for potential future use)
+     * @returns {string|null} Attachment ID or null if not found
+     */
+    function getAttachmentIdFromGlobals($modal) {
+        if (window._wpMediaGridSettings &&
+            window._wpMediaGridSettings.queryVars &&
+            window._wpMediaGridSettings.queryVars.item) {
+            try {
+                return window._wpMediaGridSettings.queryVars.item;
+            } catch (e) {
+                // Silently handle error
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Searches DOM for attachment ID using various strategies
+     * @param {jQuery} $modal - Modal jQuery object to search within
+     * @returns {string|null} Found attachment ID or null
+     */
+    function findAttachmentIdInDOM($modal) {
+        // Strategy 1: Look for selected attachment elements
+        const $selected = $modal.find(SELECTORS.selectedAttachment);
+        if ($selected.length) {
+            const attachmentId = $selected.attr('data-id') || $selected.data('id');
+            if (attachmentId) {
+                return attachmentId;
+            }
+        }
+
+        // Strategy 2: Look for any element with data-id
+        const $withDataId = $modal.find(SELECTORS.elementsWithDataId);
+        if ($withDataId.length) {
+            const attachmentId = $withDataId.first().attr('data-id');
+            if (attachmentId && REGEX_PATTERNS.numericId.test(attachmentId)) {
+                return attachmentId;
+            }
+        }
+
+        // Strategy 3: Look in attachment details for edit links
+        const $details = $modal.find(SELECTORS.attachmentDetails + ', ' + SELECTORS.mediaSidebar);
+        if ($details.length) {
+            const $link = $details.find(SELECTORS.editLinks).first();
+            if ($link.length) {
+                const href = $link.attr('href');
+                const match = href.match(REGEX_PATTERNS.postId);
+                if (match) {
+                    return match[1];
+                }
+            }
+        }
+
+        // Strategy 4: Look for attachment ID in element IDs
+        const allElements = $modal.find('*');
+        for (let i = 0; i < allElements.length; i++) {
+            const el = allElements[i];
+            const id = el.getAttribute('id');
+            if (id && REGEX_PATTERNS.attachmentIdPrefix.test(id)) {
+                const attachmentId = id.replace('attachment-', '');
+                if (REGEX_PATTERNS.numericId.test(attachmentId)) {
+                    return attachmentId;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Extracts attachment metadata from DOM elements
+     * @param {jQuery} $modal - Modal jQuery object to search within
+     * @returns {Object} Object containing extracted metadata
+     */
+    function extractAttachmentMetadata($modal) {
+        const $filename = $modal.find(SELECTORS.filename).first();
+        const filename = extractText($filename);
+
+        const $title = $modal.find(SELECTORS.title).first();
+        const title = extractValue($title) || filename;
+
+        const $img = $modal.find(SELECTORS.image).first();
+        const url = $img.attr('src') || $img.attr('data-src') || '';
+
+        const $fullLink = $modal.find(SELECTORS.fullSizeLinks).first();
+        const fullUrl = $fullLink.attr('href') || url;
+
+        const $alt = $modal.find(SELECTORS.altText).first();
+        const alt = extractValue($alt);
+
+        const mime = detectMimeType(filename || url);
+
+        return {
+            filename,
+            title,
+            url,
+            fullUrl,
+            alt,
+            mime
+        };
+    }
+
+    /**
+     * Gets the currently selected attachment from the media modal
+     * @param {jQuery} $modal - Modal jQuery object
+     * @returns {Object|null} Attachment object or null if not found
+     */
+    function getSelectedAttachment($modal) {
+        // Try getting from WordPress globals first
+        const globalAttachmentId = getAttachmentIdFromGlobals($modal);
+        if (globalAttachmentId) {
+            try {
+                return createAttachmentFromDOM($modal, globalAttachmentId);
+            } catch (e) {
+                // Continue to DOM parsing
+            }
+        }
+
+        // Parse from DOM if modal exists
+        if (!$modal || !$modal.length) {
+            return null;
+        }
+
+        try {
+            const attachmentId = findAttachmentIdInDOM($modal);
+            if (attachmentId) {
+                return createAttachmentFromDOM($modal, attachmentId);
+            }
+        } catch (e) {
+            // Silently handle DOM parsing errors
+        }
+
+        return null;
+    }
+
+    /**
+     * Creates attachment object from DOM data
+     * @param {jQuery} $modal - Modal jQuery object
+     * @param {string} attachmentId - ID of the attachment
+     * @returns {Object|null} Created attachment object or null on error
+     */
+    function createAttachmentFromDOM($modal, attachmentId) {
+        try {
+            const metadata = extractAttachmentMetadata($modal);
+
+            const attachment = {
+                id: parseInt(attachmentId, 10),
+                title: metadata.title,
+                filename: metadata.filename,
+                url: metadata.fullUrl || metadata.url,
+                mime: metadata.mime,
+                alt: metadata.alt,
+                sizes: metadata.url ? {
+                    full: { url: metadata.fullUrl || metadata.url },
+                    large: { url: metadata.url },
+                    medium: { url: metadata.url },
+                    thumbnail: { url: metadata.url }
+                } : {},
+                // Add get method for compatibility with WordPress media objects
+                get: function (key) {
+                    return this[key];
+                }
+            };
+
+            return attachment;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Creates or returns existing mount node for React app
+     * @param {Element} modalEl - Modal DOM element
+     * @returns {Element} Mount node element
+     */
     function createMountNode(modalEl) {
-        var id = 'pbai-enhance-root';
-        var existing = modalEl.querySelector('#' + id);
+        const existing = modalEl.querySelector('#' + MOUNT_ROOT_ID);
         if (existing) return existing;
-        var mount = document.createElement('div');
-        mount.id = id;
+
+        const mount = document.createElement('div');
+        mount.id = MOUNT_ROOT_ID;
         mount.setAttribute('role', 'dialog');
         mount.setAttribute('aria-modal', 'true');
         mount.style.position = 'fixed';
         mount.style.inset = '0';
-        mount.style.zIndex = '100000';
+        mount.style.zIndex = OVERLAY_Z_INDEX;
         modalEl.appendChild(mount);
+
         return mount;
     }
 
+    /**
+     * Removes mount node from modal
+     * @param {Element} modalEl - Modal DOM element
+     */
     function removeMountNode(modalEl) {
-        var node = modalEl.querySelector('#pbai-enhance-root');
-        if (node && node.parentNode) node.parentNode.removeChild(node);
+        const node = modalEl.querySelector('#' + MOUNT_ROOT_ID);
+        if (node && node.parentNode) {
+            node.parentNode.removeChild(node);
+        }
     }
 
-    function mountAppIntoModal(modalEl, attachment) {
-        console.log('mountAppIntoModal called with attachment:', attachment);
+    // =============================================================================
+    // REACT APP INTEGRATION
+    // =============================================================================
 
-        var entry = getManifestEntry('src/mount.tsx');
-        console.log('Retrieved entry:', entry);
-
-        if (!entry || !entry.file) {
-            console.error('No manifest entry found for src/mount.tsx');
-            console.log('Available PBAIEnhance data:', window.PBAIEnhance);
-            window.alert('AI Enhance app is not built yet. Check console for details.');
-            return;
-        }
-        console.log('Entry before CSS injection:', entry);
-        ensureStyleInjected(entry);
-
-        // Manual fallback: inject App CSS directly
-        var manifest = (window.PBAIEnhance && window.PBAIEnhance.manifest) || {};
-        console.log('Full manifest:', manifest);
-
-        // Look for App CSS in the manifest
-        Object.keys(manifest).forEach(function (key) {
-            var manifestEntry = manifest[key];
-            if (manifestEntry.css && manifestEntry.css.length > 0) {
-                console.log('Found CSS in manifest entry:', key, manifestEntry.css);
-                manifestEntry.css.forEach(function (css) {
-                    var href = getDistUrl() + css;
-                    if (!document.querySelector('link[data-pbai-css="' + href + '"]')) {
-                        var link = document.createElement('link');
-                        link.rel = 'stylesheet';
-                        link.href = href;
-                        link.setAttribute('data-pbai-css', href);
-                        document.head.appendChild(link);
-                        console.log('Manually injected CSS:', href);
-                    }
-                });
-            }
-        });
-        var jsUrl = getDistUrl() + entry.file;
-        var mountNode = createMountNode(modalEl);
-
-        // Prepare attachment props
-        var props = {};
+    /**
+     * Prepares props object for React app from attachment data
+     * @param {Object|null} attachment - Attachment object
+     * @returns {Object} Props object for React app
+     */
+    function prepareAppProps(attachment) {
+        const props = {};
         if (attachment) {
             props.attachment = {
                 id: attachment.get ? attachment.get('id') : attachment.id,
@@ -352,149 +541,183 @@
                 sizes: attachment.get ? attachment.get('sizes') : attachment.sizes
             };
         }
-
-        console.log('Importing module from:', jsUrl);
-        import(jsUrl).then(function (mod) {
-            console.log('Module loaded successfully:', mod);
-            console.log('Module keys:', Object.keys(mod));
-            console.log('MOUNT_VERSION:', mod.MOUNT_VERSION);
-            console.log('mountApp type:', typeof mod.mountApp);
-
-            // Try to get mountApp from module exports first, then fall back to global
-            var mountAppFn = mod.mountApp || window.PBAIMountApp;
-            console.log('mountApp function found:', typeof mountAppFn);
-
-            if (typeof mountAppFn === 'function') {
-                console.log('mountApp function found, calling with props:', props);
-                // Listen for close event from React app
-                mountNode.addEventListener('pbai:close', function () {
-                    console.log('Close event received');
-                    unmountAppFromModal(modalEl);
-                });
-                mountAppFn(mountNode, props);
-                console.log('mountApp called successfully');
-            } else {
-                console.error('mountApp function not found in module or global scope:', mod);
-                console.log('Available global functions:', {
-                    PBAIMountApp: typeof window.PBAIMountApp,
-                    PBAIUnmountApp: typeof window.PBAIUnmountApp
-                });
-                window.alert('React app loaded but mountApp function missing.');
-            }
-        }).catch(function (error) {
-            console.error('Failed to load AI Enhance app:', error);
-            window.alert('Failed to load AI Enhance app. Check console for details.');
-        });
+        return props;
     }
 
+    /**
+     * Mounts React app into modal with given attachment
+     * @param {Element} modalEl - Modal DOM element
+     * @param {Object|null} attachment - Attachment object to pass to app
+     */
+    function mountAppIntoModal(modalEl, attachment) {
+        const entry = getManifestEntry(MANIFEST_ENTRY_KEY);
+
+        if (!entry || !entry.file) {
+            window.alert(ERROR_MESSAGES.appNotBuilt);
+            return;
+        }
+
+        ensureStyleInjected(entry);
+
+        const jsUrl = getDistUrl() + entry.file;
+        const mountNode = createMountNode(modalEl);
+        const props = prepareAppProps(attachment);
+
+        import(jsUrl)
+            .then(function (mod) {
+                const mountAppFn = mod.mountApp || window.PBAIMountApp;
+
+                if (typeof mountAppFn === 'function') {
+                    // Listen for close event from React app
+                    mountNode.addEventListener(CLOSE_EVENT_NAME, function () {
+                        unmountAppFromModal(modalEl);
+                    });
+
+                    mountAppFn(mountNode, props);
+                } else {
+                    window.alert(ERROR_MESSAGES.mountFunctionMissing);
+                }
+            })
+            .catch(function (error) {
+                window.alert(ERROR_MESSAGES.loadFailed);
+            });
+    }
+
+    /**
+     * Unmounts React app from modal
+     * @param {Element} modalEl - Modal DOM element
+     */
     function unmountAppFromModal(modalEl) {
-        var entry = getManifestEntry('src/mount.tsx');
-        if (!entry || !entry.file) return;
-        var jsUrl = getDistUrl() + entry.file;
-        import(jsUrl).then(function (mod) {
-            // Try to get unmountApp from module exports first, then fall back to global
-            var unmountAppFn = mod.unmountApp || window.PBAIUnmountApp;
-            if (typeof unmountAppFn === 'function') {
-                unmountAppFn();
-            }
+        const entry = getManifestEntry(MANIFEST_ENTRY_KEY);
+        if (!entry || !entry.file) {
             removeMountNode(modalEl);
-        }).catch(function () {
-            removeMountNode(modalEl);
-        });
+            return;
+        }
+
+        const jsUrl = getDistUrl() + entry.file;
+
+        import(jsUrl)
+            .then(function (mod) {
+                const unmountAppFn = mod.unmountApp || window.PBAIUnmountApp;
+                if (typeof unmountAppFn === 'function') {
+                    unmountAppFn();
+                }
+                removeMountNode(modalEl);
+            })
+            .catch(function () {
+                removeMountNode(modalEl);
+            });
     }
 
+    // =============================================================================
+    // BUTTON MANAGEMENT
+    // =============================================================================
+
+    /**
+     * Creates AI enhance button with click handler
+     * @param {jQuery} $modal - Modal jQuery object
+     * @returns {jQuery} Created button element
+     */
+    function createEnhanceButton($modal) {
+        const $btn = $('<button>', {
+            'text': BUTTON_TEXT,
+            [ENHANCE_BUTTON_ATTR]: '1'
+        });
+
+        $btn.on('click', function () {
+            const attachment = getSelectedAttachment($modal);
+            if (!eligibleImageSelected(attachment)) {
+                alert(ERROR_MESSAGES.invalidImageSelected);
+                return;
+            }
+            const modalEl = $modal.get(0);
+            mountAppIntoModal(modalEl, attachment);
+        });
+
+        return $btn;
+    }
+
+    /**
+     * Injects or updates AI enhance button in media modal
+     * @param {jQuery} $modal - Modal jQuery object
+     */
     function injectOrUpdateButton($modal) {
-        console.log('injectOrUpdateButton called with:', $modal.length, $modal.get(0));
         if (!$modal || !$modal.length) return;
 
-        // Try multiple selectors to find a target
-        var $target = $modal.find('.attachment-info:visible').first();
-        if (!$target.length) {
-            $target = $modal.find('.media-sidebar:visible').first();
-        }
-        if (!$target.length) {
-            $target = $modal.find('.attachment-details:visible').first();
-        }
-
-        console.log('Target found:', $target.length, $target.get(0));
+        const $target = findButtonTarget($modal);
         if (!$target.length) return;
 
-        var selector = '[data-pbai-enhance="1"]';
-        var $btn = $target.find(selector);
-        var selectedAttachment = getSelectedAttachment($modal);
-        var isEligible = eligibleImageSelected(selectedAttachment);
+        const $btn = $target.find(SELECTORS.enhanceButton);
+        const selectedAttachment = getSelectedAttachment($modal);
+        const isEligible = eligibleImageSelected(selectedAttachment);
 
-        console.log('Selected attachment:', selectedAttachment, 'Eligible:', isEligible);
-
+        // Create button if it doesn't exist and attachment is eligible
         if (!$btn.length && isEligible) {
-            console.log('Creating button...');
-            $btn = $('<button>', {
-                'text': '✨ AI Enhance',
-                'data-pbai-enhance': '1'
-            });
-            $btn.on('click', function () {
-                console.log('Button clicked!');
-                var attachment = getSelectedAttachment($modal);
-                if (!eligibleImageSelected(attachment)) {
-                    alert('Please select a valid image file (JPEG, PNG, or WebP).');
-                    return;
-                }
-                var modalEl = $modal.get(0);
-                mountAppIntoModal(modalEl, attachment);
-            });
-            $target.prepend($btn);
-            console.log('Button injected into:', $target.get(0));
+            const $newBtn = createEnhanceButton($modal);
+            $target.prepend($newBtn);
         }
 
         // Show/hide button based on eligibility and selection state
-        if ($btn.length) {
+        const $existingBtn = $target.find(SELECTORS.enhanceButton);
+        if ($existingBtn.length) {
             if (isEligible && selectedAttachment) {
-                $btn.show();
+                $existingBtn.show();
             } else {
-                $btn.hide();
+                $existingBtn.hide();
             }
         } else if (!isEligible || !selectedAttachment) {
             // Remove any existing buttons if selection becomes ineligible
-            $target.find(selector).remove();
+            $target.find(SELECTORS.enhanceButton).remove();
         }
     }
 
+    // =============================================================================
+    // EVENT HANDLING & INITIALIZATION
+    // =============================================================================
+
+    /**
+     * Sets up event listeners for media modal triggers
+     */
     function listenForMediaModalTriggers() {
-        console.log('Setting up click listeners for media modal triggers...');
-
-        // Listen for clicks on attachment previews and set post thumbnail button
-        $(document).on('click', '.attachment-preview', function (e) {
-            console.log('Media modal trigger clicked:', this.className || this.id);
-
-            // Wait a moment for the modal to be created and populated
+        $(document).on('click', SELECTORS.attachmentPreview, function (e) {
+            // Wait for modal to be created and populated
             setTimeout(function () {
-                // Find the media modal that was opened
-                var $modal = $('.media-modal:visible, .media-frame:visible').last();
-                console.log('setTimeout: Modal injected:', $modal.length);
+                const $modal = $(SELECTORS.visibleModals).last();
                 if ($modal.length) {
-                    console.log('Found opened modal:', $modal.get(0));
                     injectOrUpdateButton($modal);
                 }
-            }, 100);
+            }, DOM_OPERATION_DELAY);
         });
     }
 
+    /**
+     * Initializes existing visible containers
+     */
+    function initializeExistingContainers() {
+        setTimeout(function () {
+            $(SELECTORS.existingContainers).each(function () {
+                const $modal = $(this);
+                injectOrUpdateButton($modal);
+            });
+        }, DOM_OPERATION_DELAY);
+    }
 
+    // =============================================================================
+    // MAIN INITIALIZATION
+    // =============================================================================
+
+    /**
+     * Main initialization function
+     * Sets up all event listeners and initializes existing modals
+     */
     $(function () {
-        console.log('PhotoBooster AI bootstrap initializing...');
         if (!isMediaScreen()) return;
 
         // Set up click listeners for media modal triggers
         listenForMediaModalTriggers();
 
-        // Initialize for any already-present containers (in case modal is already open)
-        setTimeout(function () {
-            $('.media-modal:visible, .attachments-browser:visible, .media-frame:visible').each(function () {
-                console.log('Found existing visible container:', this.className);
-                var $m = $(this);
-                injectOrUpdateButton($m);
-            });
-        }, 100);
+        // Initialize for any already-present containers
+        initializeExistingContainers();
     });
 
 })(jQuery);
