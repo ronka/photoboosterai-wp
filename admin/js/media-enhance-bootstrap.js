@@ -415,10 +415,6 @@
         if (!$target.length) {
             $target = $modal.find('.attachment-details:visible').first();
         }
-        if (!$target.length) {
-            // Fallback: inject into any visible child div
-            $target = $modal.find('div:visible').first();
-        }
 
         console.log('Target found:', $target.length, $target.get(0));
         if (!$target.length) return;
@@ -479,7 +475,7 @@
                     console.log('Found opened modal:', $modal.get(0));
                     injectOrUpdateButton($modal);
                 }
-            }, 500);
+            }, 100);
         });
     }
 
@@ -492,11 +488,13 @@
         listenForMediaModalTriggers();
 
         // Initialize for any already-present containers (in case modal is already open)
-        $('.media-modal:visible, .attachments-browser:visible, .media-frame:visible').each(function () {
-            console.log('Found existing visible container:', this.className);
-            var $m = $(this);
-            injectOrUpdateButton($m);
-        });
+        setTimeout(function () {
+            $('.media-modal:visible, .attachments-browser:visible, .media-frame:visible').each(function () {
+                console.log('Found existing visible container:', this.className);
+                var $m = $(this);
+                injectOrUpdateButton($m);
+            });
+        }, 100);
     });
 
 })(jQuery);
