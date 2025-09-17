@@ -50,6 +50,7 @@ function unmountApp() {
     root.unmount()
     root = null
     currentTarget = null
+    document.querySelector('#pbai-product-enhance-modal')?.remove()
 }
 
 // Ensure functions are available globally and not tree-shaken
