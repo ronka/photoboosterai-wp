@@ -77,6 +77,33 @@
     cursor: not-allowed;
 }
 
+/* Spinner animation for generate button */
+.pbai-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #ffffff40;
+    border-radius: 50%;
+    border-top-color: #ffffff;
+    animation: pbai-spin 1s ease-in-out infinite;
+    margin-right: 8px;
+}
+
+@keyframes pbai-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.pbai-generate-btn.generating {
+    background: #005a87;
+    cursor: wait;
+}
+
+.pbai-generate-btn.generating:hover {
+    background: #005a87;
+}
+
 /* Image popup close button */
 .pbai-image-popup-close {
     position: absolute;

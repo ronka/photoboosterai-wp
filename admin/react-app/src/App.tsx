@@ -64,9 +64,7 @@ function App({ attachment, onClose }: AppProps) {
             // Prepare form data
             const formData = new FormData()
             formData.append('attachment_id', seedImage.id.toString())
-            if (selectedPreset) {
-                formData.append('preset_id', selectedPreset)
-            }
+            formData.append('preset_id', selectedPreset)
             if (additionalInstructions.trim()) {
                 formData.append('additional_instructions', additionalInstructions.trim())
             }
@@ -224,6 +222,7 @@ function App({ attachment, onClose }: AppProps) {
                         <div className="pbai-config-section">
                             <div className="pbai-form-group">
                                 <PresetSelector
+                                    required={true}
                                     selectedPreset={selectedPreset}
                                     onPresetChange={setSelectedPreset}
                                 />
@@ -237,7 +236,7 @@ function App({ attachment, onClose }: AppProps) {
                                     onChange={(e) => setAdditionalInstructions(e.target.value)}
                                     className="pbai-textarea"
                                     rows={4}
-                                    placeholder="Describe any specific requirements for the photos like background, lighting, etc..."
+                                    placeholder="Describe any specific requirements for the photos like background, product type, etc... (e.g. 'Product is a shoe, so it should be on a shoe box')"
                                 />
                             </div>
                         </div>
@@ -245,11 +244,21 @@ function App({ attachment, onClose }: AppProps) {
                         {/* Generate Button */}
                         <div className="pbai-actions">
                             <button
-                                className="pbai-generate-btn"
+                                className={`pbai-generate-btn ${isGenerating ? 'generating' : ''}`}
                                 onClick={handleGeneratePhotos}
-                                disabled={isGenerating || !seedImage}
+                                disabled={isGenerating || !seedImage || !selectedPreset}
                             >
-                                {isGenerating ? '🔄 Generating...' : 'Generate AI Photos'}
+                                {isGenerating ? (
+                                    <>
+                                        <div>
+                                            <span className="pbai-spinner"></span>
+                                            <span className="pbai-spinner-text">Generating...</span>
+                                        </div>
+                                        <span className="text-sm">( it might take a few seconds)</span>
+                                    </>
+                                ) : (
+                                    'Generate AI Photos'
+                                )}
                             </button>
                         </div>
                     </div>
