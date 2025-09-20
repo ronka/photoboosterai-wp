@@ -30,8 +30,6 @@ interface AppProps {
 function App({ attachment, onClose }: AppProps) {
     const [isGenerating, setIsGenerating] = useState(false)
     const [seedImage, setSeedImage] = useState<Attachment | null>(attachment || null)
-    const [numberOfPhotos, setNumberOfPhotos] = useState('4')
-    const [style, setStyle] = useState('Professional')
     const [additionalInstructions, setAdditionalInstructions] = useState('')
     const [generatedPhotos, setGeneratedPhotos] = useState<GeneratedPhoto[]>([])
     const [selectedImagePopup, setSelectedImagePopup] = useState<GeneratedPhoto | null>(null)
@@ -70,7 +68,6 @@ function App({ attachment, onClose }: AppProps) {
             // Prepare form data
             const formData = new FormData()
             formData.append('attachment_id', seedImage.id.toString())
-            formData.append('style', style)
             if (additionalInstructions.trim()) {
                 formData.append('additional_instructions', additionalInstructions.trim())
             }
@@ -237,23 +234,6 @@ function App({ attachment, onClose }: AppProps) {
                             </div>
 
                             <div className="pbai-form-group">
-                                <label htmlFor="style">Style:</label>
-                                <select
-                                    id="style"
-                                    value={style}
-                                    onChange={(e) => setStyle(e.target.value)}
-                                    className="pbai-select"
-                                >
-                                    <option value="Professional">Professional</option>
-                                    <option value="Creative">Creative</option>
-                                    <option value="Artistic">Artistic</option>
-                                    <option value="Modern">Modern</option>
-                                    <option value="Vintage">Vintage</option>
-                                    <option value="Minimalist">Minimalist</option>
-                                </select>
-                            </div>
-
-                            <div className="pbai-form-group">
                                 <label htmlFor="instructions">Additional Instructions (optional):</label>
                                 <textarea
                                     id="instructions"
@@ -261,7 +241,7 @@ function App({ attachment, onClose }: AppProps) {
                                     onChange={(e) => setAdditionalInstructions(e.target.value)}
                                     className="pbai-textarea"
                                     rows={4}
-                                    placeholder="Describe any specific requirements for the photos..."
+                                    placeholder="Describe any specific requirements for the photos like background, lighting, etc..."
                                 />
                             </div>
                         </div>
