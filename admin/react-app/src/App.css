@@ -1,4 +1,5 @@
 /* PhotoBooster AI Styles - Main Import File */
+@import "tailwindcss";
 
 /* Import all component styles in order */
 @import './styles/base.css';
