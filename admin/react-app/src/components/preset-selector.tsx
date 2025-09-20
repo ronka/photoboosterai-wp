@@ -79,8 +79,12 @@ const presets = [
     },
 ]
 
-export function PresetSelector() {
-    const [selectedPreset, setSelectedPreset] = useState<string>("")
+interface PresetSelectorProps {
+    selectedPreset: string
+    onPresetChange: (preset: string) => void
+}
+
+export function PresetSelector({ selectedPreset, onPresetChange }: PresetSelectorProps) {
     const [hoveredPreset, setHoveredPreset] = useState<string | null>(null)
     const [previewPosition, setPreviewPosition] = useState({ x: 0, y: 0 })
 
@@ -94,7 +98,7 @@ export function PresetSelector() {
     }
 
     const handleSelectPreset = (preset: string) => {
-        setSelectedPreset(preset)
+        onPresetChange(preset)
         setHoveredPreset(null)
     }
 

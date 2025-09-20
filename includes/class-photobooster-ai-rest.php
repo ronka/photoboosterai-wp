@@ -49,11 +49,22 @@ class Photobooster_Ai_REST
 							},
 							'sanitize_callback' => 'absint',
 						),
-						'style' => array(
-							'required'          => true,
+						'preset_id' => array(
+							'required'          => false,
 							'validate_callback' => function ($param) {
-								$valid_styles = array('Professional', 'Creative', 'Artistic', 'Modern', 'Vintage', 'Minimalist');
-								return in_array($param, $valid_styles, true);
+								$valid_presets = array(
+									'white-infinity',
+									'minimal-shadow',
+									'color-pop',
+									'lifestyle-neutral',
+									'glossy-reflection',
+									'soft-pastel',
+									'natural-light-desk',
+									'dramatic-dark',
+									'plant-props',
+									'gradient-glow'
+								);
+								return empty($param) || in_array($param, $valid_presets, true);
 							},
 							'sanitize_callback' => 'sanitize_text_field',
 						),
@@ -94,7 +105,7 @@ class Photobooster_Ai_REST
 
 		// Get sanitized parameters (already validated by route args)
 		$attachment_id = $request->get_param('attachment_id');
-		$style = $request->get_param('style');
+		$preset_id = $request->get_param('preset_id') ?: '';
 		$additional_instructions = $request->get_param('additional_instructions') ?: '';
 
 		// Validate attachment for processing
@@ -123,11 +134,11 @@ class Photobooster_Ai_REST
 		}
 
 		// Log the generation attempt
-		error_log(sprintf('PhotoBooster AI: Starting image generation for attachment %d with style: %s', $attachment_id, $style));
+		error_log(sprintf('PhotoBooster AI: Starting image generation for attachment %d with preset: %s', $attachment_id, $preset_id));
 
 		try {
 			// Call NextJS API integration
-			$api_result = $this->call_nextjs_api($file_path, $style, $additional_instructions);
+			$api_result = $this->call_nextjs_api($file_path, $preset_id, $additional_instructions);
 
 			// Check if API call returned an error
 			if (is_array($api_result) && isset($api_result['success']) && ! $api_result['success']) {
@@ -294,11 +305,11 @@ class Photobooster_Ai_REST
 	 * Call NextJS API to generate enhanced image.
 	 *
 	 * @param string $file_path   Path to the seed image file.
-	 * @param string $style       Generation style.
+	 * @param string $preset_id   Selected preset ID.
 	 * @param string $additional_instructions Optional additional instructions.
 	 * @return string|false Base64 encoded image data on success, false on failure.
 	 */
-	private function call_nextjs_api($file_path, $style, $additional_instructions)
+	private function call_nextjs_api($file_path, $preset_id, $additional_instructions)
 	{
 		// Get API configuration from settings
 		$settings = get_option('photobooster_ai_settings', array());
@@ -326,7 +337,7 @@ class Photobooster_Ai_REST
 		}
 
 		// Construct the prompt
-		$prompt = $this->build_generation_prompt($style, $additional_instructions);
+		$prompt = $this->build_generation_prompt($preset_id, $additional_instructions);
 
 		// Get image file contents
 		$image_contents = file_get_contents($file_path);
@@ -441,24 +452,29 @@ class Photobooster_Ai_REST
 	}
 
 	/**
-	 * Build generation prompt combining style and additional instructions.
+	 * Build generation prompt combining preset and additional instructions.
 	 *
-	 * @param string $style                   Generation style.
+	 * @param string $preset_id               Selected preset ID.
 	 * @param string $additional_instructions Additional instructions.
 	 * @return string Combined prompt.
 	 */
-	private function build_generation_prompt($style, $additional_instructions)
+	private function build_generation_prompt($preset_id, $additional_instructions)
 	{
-		$style_prompts = array(
-			'Professional' => 'Create a professional, high-quality enhanced version of this image with improved lighting, sharpness, and color balance.',
-			'Creative'     => 'Transform this image with creative enhancements, artistic flair, and dynamic visual improvements.',
-			'Artistic'     => 'Apply artistic enhancements to this image with painterly effects, rich textures, and creative interpretation.',
-			'Modern'       => 'Modernize this image with contemporary styling, clean aesthetics, and current design trends.',
-			'Vintage'      => 'Give this image a vintage look with retro styling, warm tones, and classic photographic effects.',
-			'Minimalist'   => 'Enhance this image with minimalist aesthetics, clean lines, and simplified composition.',
+		$preset_prompts = array(
+			'white-infinity'     => 'Transform the product into a professional studio photo on a pure seamless white background, soft even lighting, crisp details, no shadows, commercial catalog style.',
+			'minimal-shadow'     => 'Enhance the product with a soft studio setup, light gray background, gentle diffused shadows beneath and around the object, modern e-commerce look.',
+			'color-pop'          => 'Place the product in a vibrant studio scene with a single bold background color, soft light reflections, high contrast to emphasize the product, editorial style.',
+			'lifestyle-neutral'  => 'Render the product in a styled lifestyle scene with neutral tones, clean surfaces, natural daylight effect, minimal furniture or props, calm and aspirational mood.',
+			'glossy-reflection'  => 'Place the product on a glossy reflective surface, clean studio lighting from above, subtle reflection visible underneath, premium catalog feel.',
+			'soft-pastel'        => 'Transform into a studio shot with pastel background (choose color), diffused lighting, dreamy highlights, playful and elegant atmosphere.',
+			'natural-light-desk' => 'Show the product on a modern tabletop with sunlight filtering in from the side, natural shadows, lifestyle photo with airy and authentic feel.',
+			'dramatic-dark'      => 'Place the product in a dramatic studio scene with deep black background, spotlight glow, strong contrast, cinematic and luxurious mood.',
+			'plant-props'        => 'Render the product in a styled studio scene with minimal props (green plants, books, small decor), soft neutral background, aspirational lifestyle aesthetic.',
+			'gradient-glow'      => 'Enhance the product with a soft studio gradient background (two tones), diffused top lighting, clean balanced shadows, futuristic product showcase.',
 		);
 
-		$base_prompt = $style_prompts[$style] ?? $style_prompts['Professional'];
+		// Default to white-infinity if no preset selected or invalid preset
+		$base_prompt = $preset_prompts[$preset_id] ?? $preset_prompts['white-infinity'];
 
 		if (! empty($additional_instructions)) {
 			$base_prompt .= ' Additional requirements: ' . $additional_instructions;

@@ -30,6 +30,7 @@ interface AppProps {
 function App({ attachment, onClose }: AppProps) {
     const [isGenerating, setIsGenerating] = useState(false)
     const [seedImage, setSeedImage] = useState<Attachment | null>(attachment || null)
+    const [selectedPreset, setSelectedPreset] = useState<string>('')
     const [additionalInstructions, setAdditionalInstructions] = useState('')
     const [generatedPhotos, setGeneratedPhotos] = useState<GeneratedPhoto[]>([])
     const [selectedImagePopup, setSelectedImagePopup] = useState<GeneratedPhoto | null>(null)
@@ -68,6 +69,9 @@ function App({ attachment, onClose }: AppProps) {
             // Prepare form data
             const formData = new FormData()
             formData.append('attachment_id', seedImage.id.toString())
+            if (selectedPreset) {
+                formData.append('preset_id', selectedPreset)
+            }
             if (additionalInstructions.trim()) {
                 formData.append('additional_instructions', additionalInstructions.trim())
             }
@@ -230,7 +234,10 @@ function App({ attachment, onClose }: AppProps) {
                         {/* Configuration Options */}
                         <div className="pbai-config-section">
                             <div className="pbai-form-group">
-                                <PresetSelector />
+                                <PresetSelector
+                                    selectedPreset={selectedPreset}
+                                    onPresetChange={setSelectedPreset}
+                                />
                             </div>
 
                             <div className="pbai-form-group">
