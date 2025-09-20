@@ -321,10 +321,9 @@ class Photobooster_Ai_REST
 			$api_key = $crypto->decrypt_api_key($settings['api_key']);
 		}
 
-		// Get API endpoint (with fallback)
-		$nextjs_api_url = !empty($settings['api_endpoint'])
-			? $settings['api_endpoint']
-			: PHOTOBOOSTER_AI_DEFAULT_ENDPOINT;
+		// Get API endpoint
+		$settings_instance = new Photobooster_Ai_Settings();
+		$nextjs_api_url = $settings_instance->get_api_endpoint();
 
 		// Validate API key exists
 		if (empty($api_key)) {
@@ -398,11 +397,6 @@ class Photobooster_Ai_REST
 		// Handle authentication failures
 		if (in_array($response_code, array(401, 403))) {
 			error_log('PhotoBooster AI: Authentication failed with code: ' . $response_code);
-
-			// Update connection status in settings
-			$settings['connection_status'] = 'failed';
-			$settings['last_error'] = 'Authentication failed';
-			update_option('photobooster_ai_settings', $settings);
 
 			return array(
 				'success' => false,

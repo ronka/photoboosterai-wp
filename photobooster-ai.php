@@ -26,7 +26,7 @@
  */
 
 // If this file is called directly, abort.
-if ( ! defined( 'WPINC' ) ) {
+if (! defined('WPINC')) {
 	die;
 }
 
@@ -35,27 +35,28 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'PHOTOBOOSTER_AI_VERSION', '1.0.0' );
+define('PHOTOBOOSTER_AI_VERSION', '1.0.0');
 
 /**
  * Default configuration constants.
  */
-define( 'PHOTOBOOSTER_AI_DEFAULT_ENDPOINT', 'http://localhost:3000/api/generate-image' );
-define( 'PHOTOBOOSTER_AI_API_TIMEOUT', 60 );
-define( 'PHOTOBOOSTER_AI_SETTINGS_CAPABILITY', 'manage_options' );
+define('PHOTOBOOSTER_AI_DEFAULT_ENDPOINT', 'https://photobooster-ai.vercel.app/api/generate-image');
+define('PHOTOBOOSTER_AI_API_TIMEOUT', 60);
+define('PHOTOBOOSTER_AI_SETTINGS_CAPABILITY', 'manage_options');
 
 /**
  * Security settings.
  */
-define( 'PHOTOBOOSTER_AI_ENCRYPTION_METHOD', 'sodium' );
-define( 'PHOTOBOOSTER_AI_KEY_MIN_LENGTH', 32 );
+define('PHOTOBOOSTER_AI_ENCRYPTION_METHOD', 'sodium');
+define('PHOTOBOOSTER_AI_KEY_MIN_LENGTH', 32);
 
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-photobooster-ai-activator.php
  */
-function activate_photobooster_ai() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-photobooster-ai-activator.php';
+function activate_photobooster_ai()
+{
+	require_once plugin_dir_path(__FILE__) . 'includes/class-photobooster-ai-activator.php';
 	Photobooster_Ai_Activator::activate();
 }
 
@@ -63,19 +64,20 @@ function activate_photobooster_ai() {
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-photobooster-ai-deactivator.php
  */
-function deactivate_photobooster_ai() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-photobooster-ai-deactivator.php';
+function deactivate_photobooster_ai()
+{
+	require_once plugin_dir_path(__FILE__) . 'includes/class-photobooster-ai-deactivator.php';
 	Photobooster_Ai_Deactivator::deactivate();
 }
 
-register_activation_hook( __FILE__, 'activate_photobooster_ai' );
-register_deactivation_hook( __FILE__, 'deactivate_photobooster_ai' );
+register_activation_hook(__FILE__, 'activate_photobooster_ai');
+register_deactivation_hook(__FILE__, 'deactivate_photobooster_ai');
 
 /**
  * The core plugin class that is used to define internationalization,
  * admin-specific hooks, and public-facing site hooks.
  */
-require plugin_dir_path( __FILE__ ) . 'includes/class-photobooster-ai.php';
+require plugin_dir_path(__FILE__) . 'includes/class-photobooster-ai.php';
 
 /**
  * Begins execution of the plugin.
@@ -86,10 +88,10 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-photobooster-ai.php';
  *
  * @since    1.0.0
  */
-function run_photobooster_ai() {
+function run_photobooster_ai()
+{
 
 	$plugin = new Photobooster_Ai();
 	$plugin->run();
-
 }
 run_photobooster_ai();
