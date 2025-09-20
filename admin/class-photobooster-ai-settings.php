@@ -37,8 +37,7 @@ class Photobooster_Ai_Settings
     private const SUCCESS_API_KEY_UPDATED = 'api_key_updated';
 
 
-    // API endpoint URL
-    private const API_ENDPOINT = PHOTOBOOSTER_AI_DEFAULT_ENDPOINT;
+    // API endpoint URL - now uses helper function
 
     /**
      * The crypto instance for encryption/decryption.
@@ -285,13 +284,24 @@ class Photobooster_Ai_Settings
     }
 
     /**
-     * Get API endpoint URL.
+     * Get API endpoint URL for image generation.
      *
      * @since    1.0.0
-     * @return   string    The API endpoint URL.
+     * @return   string    The API endpoint URL for image generation.
      */
     public function get_api_endpoint()
     {
-        return self::API_ENDPOINT;
+        return photobooster_ai_get_generate_image_endpoint();
+    }
+
+    /**
+     * Get credits API endpoint URL.
+     *
+     * @since    1.0.1
+     * @return   string    The credits API endpoint URL.
+     */
+    public function get_credits_endpoint()
+    {
+        return photobooster_ai_get_credits_endpoint();
     }
 }

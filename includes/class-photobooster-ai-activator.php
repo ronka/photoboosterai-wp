@@ -3,7 +3,7 @@
 /**
  * Fired during plugin activation
  *
- * @link       https://PhotoBoosterai.vercel.app
+ * @link       https://photobooster-ai.vercel.app
  * @since      1.0.0
  *
  * @package    Photobooster_Ai
@@ -20,7 +20,8 @@
  * @subpackage Photobooster_Ai/includes
  * @author     PhotoBooster AI <PhotoBoosterai@gmail.com>
  */
-class Photobooster_Ai_Activator {
+class Photobooster_Ai_Activator
+{
 
 	/**
 	 * Short Description. (use period)
@@ -29,8 +30,5 @@ class Photobooster_Ai_Activator {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function activate() {
-
-	}
-
+	public static function activate() {}
 }

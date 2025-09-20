@@ -3,7 +3,7 @@
 /**
  * Fired during plugin deactivation
  *
- * @link       https://PhotoBoosterai.vercel.app
+ * @link       https://photobooster-ai.vercel.app
  * @since      1.0.0
  *
  * @package    Photobooster_Ai
@@ -20,7 +20,8 @@
  * @subpackage Photobooster_Ai/includes
  * @author     PhotoBooster AI <PhotoBoosterai@gmail.com>
  */
-class Photobooster_Ai_Deactivator {
+class Photobooster_Ai_Deactivator
+{
 
 	/**
 	 * Short Description. (use period)
@@ -29,8 +30,5 @@ class Photobooster_Ai_Deactivator {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function deactivate() {
-
-	}
-
+	public static function deactivate() {}
 }

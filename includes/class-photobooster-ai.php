@@ -6,7 +6,7 @@
  * A class definition that includes attributes and functions used across both the
  * public-facing side of the site and the admin area.
  *
- * @link       https://PhotoBoosterai.vercel.app
+ * @link       https://photobooster-ai.vercel.app
  * @since      1.0.0
  *
  * @package    Photobooster_Ai
@@ -176,6 +176,9 @@ class Photobooster_Ai
 
 		// Add AI Enhance button to WooCommerce product image area
 		$this->loader->add_action('admin_footer', $plugin_admin, 'inject_product_image_enhance_button');
+
+		// Register AJAX handlers
+		$this->loader->add_action('wp_ajax_photobooster_ai_check_credits', $plugin_admin, 'handle_credits_check');
 
 		// Initialize settings management.
 		$plugin_settings = new Photobooster_Ai_Settings();

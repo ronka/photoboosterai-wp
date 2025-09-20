@@ -5,7 +5,7 @@
  *
  * This file is used to markup the public-facing aspects of the plugin.
  *
- * @link       https://PhotoBoosterai.vercel.app
+ * @link       https://photobooster-ai.vercel.app
  * @since      1.0.0
  *
  * @package    Photobooster_Ai

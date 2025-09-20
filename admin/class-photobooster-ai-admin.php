@@ -3,7 +3,7 @@
 /**
  * The admin-specific functionality of the plugin.
  *
- * @link       https://PhotoBoosterai.vercel.app
+ * @link       https://photobooster-ai.vercel.app
  * @since      1.0.0
  *
  * @package    Photobooster_Ai
@@ -140,6 +140,14 @@ class Photobooster_Ai_Admin
 			$this->version,
 			false
 		);
+
+		// Localize script with AJAX data for settings page
+		if (isset($_GET['page']) && $_GET['page'] === 'photobooster-ai-settings') {
+			wp_localize_script($this->plugin_name, 'photobooster_ai_admin', array(
+				'ajax_url' => admin_url('admin-ajax.php'),
+				'nonce' => wp_create_nonce('wp_rest'),
+			));
+		}
 
 		// Register and conditionally enqueue the media enhancement bootstrap
 		$this->register_media_enhancement_script();
@@ -657,5 +665,65 @@ class Photobooster_Ai_Admin
 			});
 		</script>
 <?php
+	}
+
+	/**
+	 * Handle AJAX request to check user credits via API key
+	 *
+	 * @since 1.0.0
+	 */
+	public function handle_credits_check()
+	{
+		// Verify nonce for security
+		if (!wp_verify_nonce($_POST['nonce'], 'wp_rest')) {
+			wp_send_json_error(array('message' => 'Security check failed'));
+		}
+
+		// Check user permissions
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(array('message' => 'Insufficient permissions'));
+		}
+
+		// Get API key from request
+		$api_key = sanitize_text_field($_POST['api_key']);
+
+		if (empty($api_key)) {
+			wp_send_json_error(array('message' => 'API key is required'));
+		}
+
+		// Get credits API endpoint
+		$credits_api_url = photobooster_ai_get_credits_endpoint();
+		$response = wp_remote_get(add_query_arg('apiKey', urlencode($api_key), $credits_api_url), array(
+			'timeout' => 30,
+			'headers' => array(
+				'Content-Type' => 'application/json',
+			),
+		));
+
+		if (is_wp_error($response)) {
+			wp_send_json_error(array('message' => 'Failed to connect to API: ' . $response->get_error_message()));
+		}
+
+		$status_code = wp_remote_retrieve_response_code($response);
+		$body = wp_remote_retrieve_body($response);
+
+		if ($status_code !== 200) {
+			$error_data = json_decode($body, true);
+			wp_send_json_error(array(
+				'message' => isset($error_data['error']) ? $error_data['error'] : 'API request failed with status ' . $status_code
+			));
+		}
+
+		$data = json_decode($body, true);
+
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			wp_send_json_error(array('message' => 'Invalid JSON response from API'));
+		}
+
+		wp_send_json_success(array(
+			'credits' => $data['credits'] ?? 0,
+			'lastResetDate' => $data['lastResetDate'] ?? null,
+			'userId' => $data['userId'] ?? null
+		));
 	}
 }

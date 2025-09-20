@@ -39,7 +39,15 @@ if (!defined('WPINC')) {
                             do_settings_sections('photobooster_ai_settings');
                             ?>
 
-                            <?php submit_button('Save Settings', 'primary', 'submit', true, array('id' => 'save-settings')); ?>
+                            <div id="credits-status" style="display: none; margin-top: 10px; padding: 10px; border: 1px solid #ddd; background-color: #f9f9f9;">
+                                <h4>Current Credits</h4>
+                                <p id="credits-info">Loading...</p>
+                            </div>
+
+                            <div style="margin-top: 10px;">
+                                <button type="button" id="check-credits" class="button" style="margin-right: 10px;">Check Credits</button>
+                                <?php submit_button('Save Settings', 'primary', 'submit', true, array('id' => 'save-settings')); ?>
+                            </div>
                         </form>
                     </div>
                 </div>

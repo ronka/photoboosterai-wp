@@ -8,17 +8,17 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              https://PhotoBoosterai.vercel.app
+ * @link              https://photobooster-ai.vercel.app
  * @since             1.0.0
  * @package           Photobooster_Ai
  *
  * @wordpress-plugin
  * Plugin Name:       PhotoBooster AI
- * Plugin URI:        https://PhotoBoosterai.vercel.app
+ * Plugin URI:        https://photobooster-ai.vercel.app
  * Description:       Generate studio-quality images from a single photo—no expensive gear, no photo shoots. Upload your product, and within seconds, get polished photos with clean backgrounds, lifestyle mockups, and marketing-ready variations.
  * Version:           1.0.0
  * Author:            PhotoBooster AI
- * Author URI:        https://PhotoBoosterai.vercel.app/
+ * Author URI:        https://photobooster-ai.vercel.app/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       photobooster-ai
@@ -38,9 +38,10 @@ if (! defined('WPINC')) {
 define('PHOTOBOOSTER_AI_VERSION', '1.0.0');
 
 /**
- * Default configuration constants.
+ * API Configuration constants.
  */
-define('PHOTOBOOSTER_AI_DEFAULT_ENDPOINT', 'https://photobooster-ai.vercel.app/api/generate-image');
+define('PHOTOBOOSTER_AI_BASE_URL', 'https://photobooster-ai.vercel.app');
+define('PHOTOBOOSTER_AI_API_BASE_PATH', 'api');
 define('PHOTOBOOSTER_AI_API_TIMEOUT', 60);
 define('PHOTOBOOSTER_AI_SETTINGS_CAPABILITY', 'manage_options');
 
@@ -49,6 +50,55 @@ define('PHOTOBOOSTER_AI_SETTINGS_CAPABILITY', 'manage_options');
  */
 define('PHOTOBOOSTER_AI_ENCRYPTION_METHOD', 'sodium');
 define('PHOTOBOOSTER_AI_KEY_MIN_LENGTH', 32);
+
+/**
+ * Helper functions for API endpoints.
+ */
+
+/**
+ * Get the full API endpoint URL for a specific endpoint.
+ *
+ * @since 1.0.0
+ * @param string $endpoint The API endpoint path (e.g., 'generate-image', 'credits').
+ * @return string The full API endpoint URL.
+ */
+function photobooster_ai_get_api_endpoint($endpoint = '')
+{
+	$base_url = PHOTOBOOSTER_AI_BASE_URL;
+	$api_path = PHOTOBOOSTER_AI_API_BASE_PATH;
+
+	// Construct base API URL
+	$base_api_url = rtrim($base_url, '/') . '/' . ltrim($api_path, '/');
+
+	// Add specific endpoint if provided
+	if (!empty($endpoint)) {
+		$base_api_url .= '/' . ltrim($endpoint, '/');
+	}
+
+	return $base_api_url;
+}
+
+/**
+ * Get the generate image API endpoint URL.
+ *
+ * @since 1.0.0
+ * @return string The generate image API endpoint URL.
+ */
+function photobooster_ai_get_generate_image_endpoint()
+{
+	return photobooster_ai_get_api_endpoint('generate-image');
+}
+
+/**
+ * Get the credits API endpoint URL.
+ *
+ * @since 1.0.0
+ * @return string The credits API endpoint URL.
+ */
+function photobooster_ai_get_credits_endpoint()
+{
+	return photobooster_ai_get_api_endpoint('credits');
+}
 
 /**
  * The code that runs during plugin activation.
