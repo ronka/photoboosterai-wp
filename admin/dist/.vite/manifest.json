@@ -1,31 +1,83 @@
 {
-  "_App-BOQwt1LX.css": {
-    "file": "assets/App-BOQwt1LX.css",
-    "src": "_App-BOQwt1LX.css"
+  "_App-B9PZIdpe.css": {
+    "file": "assets/App-B9PZIdpe.css",
+    "src": "_App-B9PZIdpe.css"
   },
-  "_App-U9Poh0uj.js": {
-    "file": "assets/App-U9Poh0uj.js",
+  "_App-CmqO4Zub.js": {
+    "file": "assets/App-CmqO4Zub.js",
     "name": "App",
     "css": [
-      "assets/App-BOQwt1LX.css"
+      "assets/App-B9PZIdpe.css"
+    ],
+    "assets": [
+      "assets/white-infinity-preset-BkhawXIj.png",
+      "assets/minimal-shadow-preset-ID_KQnwb.png",
+      "assets/color-pop-preset-JJ7wBSdp.png",
+      "assets/lifestyle-neutral-preset-D4oLDzz7.png",
+      "assets/glossy-reflection-preset-DF559Bgm.png",
+      "assets/soft-pastel-preset-D5DEot8z.png",
+      "assets/natural-light-desk-preset-pDZd2A1F.png",
+      "assets/dramatic-dark-preset-Cs8NoAwS.png",
+      "assets/plant-props-preset-CV8PUl69.png",
+      "assets/gradient-glow-preset-C9UC3o5c.png"
     ]
   },
   "index.html": {
-    "file": "assets/app-Cof97Nlw.js",
+    "file": "assets/app-BypG389P.js",
     "name": "app",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_App-U9Poh0uj.js"
+      "_App-CmqO4Zub.js"
     ]
   },
+  "src/assets/preset/color-pop-preset.png": {
+    "file": "assets/color-pop-preset-JJ7wBSdp.png",
+    "src": "src/assets/preset/color-pop-preset.png"
+  },
+  "src/assets/preset/dramatic-dark-preset.png": {
+    "file": "assets/dramatic-dark-preset-Cs8NoAwS.png",
+    "src": "src/assets/preset/dramatic-dark-preset.png"
+  },
+  "src/assets/preset/glossy-reflection-preset.png": {
+    "file": "assets/glossy-reflection-preset-DF559Bgm.png",
+    "src": "src/assets/preset/glossy-reflection-preset.png"
+  },
+  "src/assets/preset/gradient-glow-preset.png": {
+    "file": "assets/gradient-glow-preset-C9UC3o5c.png",
+    "src": "src/assets/preset/gradient-glow-preset.png"
+  },
+  "src/assets/preset/lifestyle-neutral-preset.png": {
+    "file": "assets/lifestyle-neutral-preset-D4oLDzz7.png",
+    "src": "src/assets/preset/lifestyle-neutral-preset.png"
+  },
+  "src/assets/preset/minimal-shadow-preset.png": {
+    "file": "assets/minimal-shadow-preset-ID_KQnwb.png",
+    "src": "src/assets/preset/minimal-shadow-preset.png"
+  },
+  "src/assets/preset/natural-light-desk-preset.png": {
+    "file": "assets/natural-light-desk-preset-pDZd2A1F.png",
+    "src": "src/assets/preset/natural-light-desk-preset.png"
+  },
+  "src/assets/preset/plant-props-preset.png": {
+    "file": "assets/plant-props-preset-CV8PUl69.png",
+    "src": "src/assets/preset/plant-props-preset.png"
+  },
+  "src/assets/preset/soft-pastel-preset.png": {
+    "file": "assets/soft-pastel-preset-D5DEot8z.png",
+    "src": "src/assets/preset/soft-pastel-preset.png"
+  },
+  "src/assets/preset/white-infinity-preset.png": {
+    "file": "assets/white-infinity-preset-BkhawXIj.png",
+    "src": "src/assets/preset/white-infinity-preset.png"
+  },
   "src/mount.tsx": {
-    "file": "assets/mount-DFCKrqAy.js",
+    "file": "assets/mount-CUPTPET9.js",
     "name": "mount",
     "src": "src/mount.tsx",
     "isEntry": true,
     "imports": [
-      "_App-U9Poh0uj.js"
+      "_App-CmqO4Zub.js"
     ],
     "css": [
       "assets/mount-tn0RQdqM.css"

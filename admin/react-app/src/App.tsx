@@ -38,11 +38,6 @@ function App({ attachment, onClose }: AppProps) {
     const closeButtonRef = useRef<HTMLButtonElement>(null)
     const imagePopupRef = useRef<HTMLDivElement>(null)
 
-    const handleSelectSeedImage = () => {
-        // TODO: Implement WordPress media modal integration
-        console.log('Opening media modal for seed image selection')
-    }
-
     const handleImageClick = (photo: GeneratedPhoto) => {
         setSelectedImagePopup(photo)
     }
@@ -222,12 +217,6 @@ function App({ attachment, onClose }: AppProps) {
                                         <p className="pbai-seed-label">No seed image selected</p>
                                     </div>
                                 )}
-                                <button
-                                    className="pbai-select-seed-btn"
-                                    onClick={handleSelectSeedImage}
-                                >
-                                    Select Seed Image
-                                </button>
                             </div>
                         </div>
 

@@ -1,5 +1,16 @@
 "use client"
 
+import whiteInfinity from '../assets/preset/white-infinity-preset.png'
+import minimalShadow from '../assets/preset/minimal-shadow-preset.png'
+import colorPop from '../assets/preset/color-pop-preset.png'
+import lifestyleNeutral from '../assets/preset/lifestyle-neutral-preset.png'
+import glossyReflection from '../assets/preset/glossy-reflection-preset.png'
+import softPastel from '../assets/preset/soft-pastel-preset.png'
+import naturalLightDesk from '../assets/preset/natural-light-desk-preset.png'
+import dramaticDark from '../assets/preset/dramatic-dark-preset.png'
+import plantProps from '../assets/preset/plant-props-preset.png'
+import gradientGlow from '../assets/preset/gradient-glow-preset.png'
+
 import type React from "react"
 
 import { useState, useEffect } from "react"
@@ -12,70 +23,70 @@ const presets = [
         name: "White Infinity",
         description: "Classic clean studio setup with seamless white background",
         prompt: "Transform the product into a professional studio photo on a pure seamless white background, soft even lighting, crisp details, no shadows, commercial catalog style.",
-        image: "preset/white-infinity-preset.png",
+        image: whiteInfinity,
     },
     {
         id: "minimal-shadow",
         name: "Minimal Shadow",
         description: "Light gray background with subtle natural shadows for depth",
         prompt: "Enhance the product with a soft studio setup, light gray background, gentle diffused shadows beneath and around the object, modern e-commerce look.",
-        image: "preset/minimal-shadow-preset.png",
+        image: minimalShadow,
     },
     {
         id: "color-pop",
         name: "Color Pop",
         description: "Bold background color that highlights the product",
         prompt: "Place the product in a vibrant studio scene with a single bold background color, soft light reflections, high contrast to emphasize the product, editorial style.",
-        image: "preset/color-pop-preset.png",
+        image: colorPop,
     },
     {
         id: "lifestyle-neutral",
         name: "Lifestyle Neutral",
         description: "Product staged in a minimal home environment",
         prompt: "Render the product in a styled lifestyle scene with neutral tones, clean surfaces, natural daylight effect, minimal furniture or props, calm and aspirational mood.",
-        image: "preset/lifestyle-neutral-preset.png",
+        image: lifestyleNeutral,
     },
     {
         id: "glossy-reflection",
         name: "Glossy Reflection",
         description: "Studio table with reflective surface",
         prompt: "Place the product on a glossy reflective surface, clean studio lighting from above, subtle reflection visible underneath, premium catalog feel.",
-        image: "preset/glossy-reflection-preset.png",
+        image: glossyReflection,
     },
     {
         id: "soft-pastel",
         name: "Soft Pastel",
         description: "Pastel background with soft highlights",
         prompt: "Transform into a studio shot with pastel background (choose color), diffused lighting, dreamy highlights, playful and elegant atmosphere.",
-        image: "preset/soft-pastel-preset.png",
+        image: softPastel,
     },
     {
         id: "natural-light-desk",
         name: "Natural Light Desk",
         description: "Bright desk/tabletop scene near a window",
         prompt: "Show the product on a modern tabletop with sunlight filtering in from the side, natural shadows, lifestyle photo with airy and authentic feel.",
-        image: "preset/natural-light-desk-preset.png",
+        image: naturalLightDesk,
     },
     {
         id: "dramatic-dark",
         name: "Dramatic Dark",
         description: "Black background with spotlight and contrast",
         prompt: "Place the product in a dramatic studio scene with deep black background, spotlight glow, strong contrast, cinematic and luxurious mood.",
-        image: "preset/dramatic-dark-preset.png",
+        image: dramaticDark,
     },
     {
         id: "plant-props",
         name: "Plant & Props",
         description: "Studio photo with greenery or props for lifestyle accent",
         prompt: "Render the product in a styled studio scene with minimal props (green plants, books, small decor), soft neutral background, aspirational lifestyle aesthetic.",
-        image: "preset/plant-props-preset.png",
+        image: plantProps,
     },
     {
         id: "gradient-glow",
         name: "Gradient Glow",
         description: "Smooth gradient background for a modern look",
         prompt: "Enhance the product with a soft studio gradient background (two tones), diffused top lighting, clean balanced shadows, futuristic product showcase.",
-        image: "preset/gradient-glow-preset.png",
+        image: gradientGlow,
     },
 ]
 
