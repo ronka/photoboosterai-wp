@@ -13,7 +13,7 @@
  * @package           Photobooster_Ai
  *
  * @wordpress-plugin
- * Plugin Name:       PhotoBooster AI
+ * Plugin Name:       eCommerce Product Photo Booster AI
  * Plugin URI:        https://photobooster-ai.vercel.app
  * Description:       Generate studio-quality images from a single photo—no expensive gear, no photo shoots. Upload your product, and within seconds, get polished photos with clean backgrounds, lifestyle mockups, and marketing-ready variations.
  * Version:           1.0.0
