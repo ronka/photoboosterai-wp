@@ -32,13 +32,8 @@ class Photobooster_Ai_Crypto
     public function encrypt_api_key($plaintext)
     {
         if (empty($plaintext)) {
-            error_log('PhotoBooster AI Crypto: Empty plaintext provided');
             return false;
         }
-
-        // Debug logging
-        error_log('PhotoBooster AI Crypto: Storing API key, length: ' . strlen($plaintext));
-        error_log('PhotoBooster AI Crypto: API key (first 10 chars): ' . substr($plaintext, 0, 10) . '...');
 
         // Just return the plain text for now (no encryption)
         return $plaintext;

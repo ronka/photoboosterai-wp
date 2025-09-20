@@ -1,114 +1,91 @@
-=== Plugin Name ===
-Contributors: (this should be a list of wordpress.org userid's)
+=== eCommerce Product Photo Booster AI ===
+Contributors: photobooster-ai
 Donate link: https://photobooster-ai.vercel.app/
-Tags: comments, spam
-Requires at least: 3.0.1
-Tested up to: 3.4
-Stable tag: 4.3
+Tags: ai, image-generation, product-photos, e-commerce, photography, marketing
+Requires at least: 5.0
+Tested up to: 6.8
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Here is a short description of the plugin.  This should be no more than 150 characters.  No markup here.
+Generate studio-quality images from a single photo—no expensive gear, no photo shoots. Upload your product, and within seconds, get polished photos with clean backgrounds, lifestyle mockups, and marketing-ready variations.
 
 == Description ==
 
-This is the long description.  No limit, and you can use Markdown (as well as in the following sections).
+**eCommerce Product Photo Booster AI** revolutionizes product photography for eCommerce businesses. Using advanced AI technology, this plugin transforms ordinary product photos into professional, studio-quality images that boost conversions and enhance your online store's visual appeal.
 
-For backwards compatibility, if this section is missing, the full length of the short description will be used, and
-Markdown parsed.
+### Key Features
 
-A few notes about the sections above:
+* **AI-Powered Image Generation**: Transform single product photos into multiple professional variations
+* **Clean Backgrounds**: Automatically remove and replace backgrounds with clean, professional options
+* **Lifestyle Mockups**: Generate realistic lifestyle and context shots for better product presentation
+* **Marketing-Ready Variations**: Create multiple angles, lighting conditions, and styling options
+* **Bulk Processing**: Enhance multiple product images simultaneously
+* **Secure API Integration**: Encrypted API key storage with secure communication
+* **WordPress Integration**: Seamless integration with your existing WordPress media library
 
-*   "Contributors" is a comma separated list of wp.org/wp-plugins.org usernames
-*   "Tags" is a comma separated list of tags that apply to the plugin
-*   "Requires at least" is the lowest version that the plugin will work on
-*   "Tested up to" is the highest version that you've *successfully used to test the plugin*. Note that it might work on
-higher versions... this is just the highest one you've verified.
-*   Stable tag should indicate the Subversion "tag" of the latest stable version, or "trunk," if you use `/trunk/` for
-stable.
+### How It Works
 
-    Note that the `readme.txt` of the stable tag is the one that is considered the defining one for the plugin, so
-if the `/trunk/readme.txt` file says that the stable tag is `4.3`, then it is `/tags/4.3/readme.txt` that'll be used
-for displaying information about the plugin.  In this situation, the only thing considered from the trunk `readme.txt`
-is the stable tag pointer.  Thus, if you develop in trunk, you can update the trunk `readme.txt` to reflect changes in
-your in-development version, without having that information incorrectly disclosed about the current stable version
-that lacks those changes -- as long as the trunk's `readme.txt` points to the correct stable tag.
+1. Upload your product photo to the WordPress media library
+2. Select from various AI enhancement presets
+3. Customize with additional instructions if needed
+4. Generate professional images in seconds
+5. Use the enhanced images directly in your eCommerce store
 
-    If no stable tag is provided, it is assumed that trunk is stable, but you should specify "trunk" if that's where
-you put the stable version, in order to eliminate any doubt.
+### Use Cases
+
+* **Product Photography**: Transform amateur product shots into professional catalog images
+* **Marketing Materials**: Generate multiple variations for A/B testing and campaigns
+* **Social Media**: Create consistent, high-quality images for social media marketing
+* **Website Optimization**: Improve product pages with better visuals for higher conversions
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
-
-e.g.
-
-1. Upload `photobooster-ai.php` to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. Place `<?php do_action('plugin_name_hook'); ?>` in your templates
+1. Upload the `photobooster-ai` folder to the `/wp-content/plugins/` directory
+2. Activate the plugin through the 'Plugins' menu in WordPress
+3. Navigate to Settings > PhotoBooster AI Settings
+4. Enter your API key (obtain from [photobooster-ai.vercel.app](https://photobooster-ai.vercel.app))
+5. Configure your preferences and start enhancing images
 
 == Frequently Asked Questions ==
 
-= A question that someone might have =
+= How do I get an API key? =
 
-An answer to that question.
+Visit [photobooster-ai.vercel.app](https://photobooster-ai.vercel.app) to sign up and obtain your API key.
 
-= What about foo bar? =
+= What image formats are supported? =
 
-Answer to foo bar dilemma.
+The plugin works with JPEG, PNG, and WebP formats. Recommended minimum resolution is 512x512 pixels.
+
+= How many images can I process? =
+
+Processing limits depend on your API plan. Check your account at [photobooster-ai.vercel.app](https://photobooster-ai.vercel.app) for details.
+
+= Can I customize the AI generation? =
+
+Yes! You can provide additional instructions when processing images to guide the AI towards your desired outcome.
+
+= Is my data secure? =
+
+Absolutely. All API keys are encrypted and stored securely. Images are processed via secure HTTPS connections.
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets
-directory take precedence. For example, `/assets/screenshot-1.png` would win over `/tags/4.3/screenshot-1.png`
-(or jpg, jpeg, gif).
-2. This is the second screen shot
+1. **Settings Page** - Configure your API key and preferences
+2. **Media Library Integration** - Process images directly from your media library
+3. **AI Enhancement Results** - Before and after comparison of enhanced images
+4. **Preset Options** - Choose from various enhancement styles
 
 == Changelog ==
 
-= 1.0 =
-* A change since the previous version.
-* Another change.
-
-= 0.5 =
-* List versions from most recent at top to oldest at bottom.
+= 1.0.0 =
+* Initial release
+* AI-powered image enhancement
+* Multiple preset options
+* Secure API integration
+* WordPress media library integration
 
 == Upgrade Notice ==
 
-= 1.0 =
-Upgrade notices describe the reason a user should upgrade.  No more than 300 characters.
-
-= 0.5 =
-This version fixes a security related bug.  Upgrade immediately.
-
-== Arbitrary section ==
-
-You may provide arbitrary sections, in the same format as the ones above.  This may be of use for extremely complicated
-plugins where more information needs to be conveyed that doesn't fit into the categories of "description" or
-"installation."  Arbitrary sections will be shown below the built-in sections outlined above.
-
-== A brief Markdown Example ==
-
-Ordered list:
-
-1. Some feature
-1. Another feature
-1. Something else about the plugin
-
-Unordered list:
-
-* something
-* something else
-* third thing
-
-Here's a link to [WordPress](http://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax].
-Titles are optional, naturally.
-
-[markdown syntax]: http://daringfireball.net/projects/markdown/syntax
-            "Markdown is what the parser uses to process much of the readme file"
-
-Markdown uses email style notation for blockquotes and I've been told:
-> Asterisks for *emphasis*. Double it up  for **strong**.
-
-`<?php code(); // goes in backticks ?>`
+= 1.0.0 =
+Initial release with full AI image enhancement capabilities. Upgrade from any previous version to access all features.

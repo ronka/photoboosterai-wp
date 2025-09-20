@@ -127,7 +127,7 @@ class Photobooster_Ai_Settings
     {
         // Check user capabilities
         if (!$this->user_has_permissions()) {
-            wp_die(__('You do not have sufficient permissions to access this page.'));
+            wp_die(esc_html(__('You do not have sufficient permissions to access this page.', 'photobooster-ai')));
         }
 
         include_once 'partials/photobooster-ai-settings-display.php';
@@ -186,9 +186,9 @@ class Photobooster_Ai_Settings
         $settings = $this->get_settings();
         $has_key = !empty($settings['api_key']);
 
-        echo '<input type="password" id="api_key" name="' . $this->option_name . '[api_key]" ' .
+        echo '<input type="password" id="api_key" name="' . esc_attr($this->option_name) . '[api_key]" ' .
             'class="regular-text" placeholder="Enter your API key" ' .
-            'value="' . ($settings['api_key'] ?? '') . '" />';
+            'value="' . esc_attr($settings['api_key'] ?? '') . '" />';
 
         if ($has_key) {
             echo '<p class="description">API key is currently set. Enter a new key to replace it.</p>';

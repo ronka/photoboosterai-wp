@@ -32,14 +32,11 @@ class Photobooster_Ai_i18n
 	 * Load the plugin text domain for translation.
 	 *
 	 * @since    1.0.0
+	 * @deprecated Since WordPress 4.6, text domains are auto-loaded.
 	 */
 	public function load_plugin_textdomain()
 	{
-
-		load_plugin_textdomain(
-			'photobooster-ai',
-			false,
-			dirname(dirname(plugin_basename(__FILE__))) . '/languages/'
-		);
+		// Text domains are auto-loaded since WordPress 4.6
+		// This method is kept for backward compatibility but does nothing
 	}
 }

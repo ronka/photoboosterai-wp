@@ -675,7 +675,7 @@ class Photobooster_Ai_Admin
 	public function handle_credits_check()
 	{
 		// Verify nonce for security
-		if (!wp_verify_nonce($_POST['nonce'], 'wp_rest')) {
+		if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'wp_rest')) {
 			wp_send_json_error(array('message' => 'Security check failed'));
 		}
 
@@ -685,7 +685,11 @@ class Photobooster_Ai_Admin
 		}
 
 		// Get API key from request
-		$api_key = sanitize_text_field($_POST['api_key']);
+		if (!isset($_POST['api_key'])) {
+			wp_send_json_error(array('message' => 'API key is required'));
+		}
+
+		$api_key = sanitize_text_field(wp_unslash($_POST['api_key']));
 
 		if (empty($api_key)) {
 			wp_send_json_error(array('message' => 'API key is required'));

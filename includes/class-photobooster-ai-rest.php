@@ -101,7 +101,6 @@ class Photobooster_Ai_REST
 	public function route_generate_image($request)
 	{ // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
 		// Log the incoming request for debugging
-		error_log('PhotoBooster AI: Received generate-image request with params: ' . print_r($request->get_params(), true));
 
 		// Get sanitized parameters (already validated by route args)
 		$attachment_id = $request->get_param('attachment_id');
@@ -111,7 +110,6 @@ class Photobooster_Ai_REST
 		// Validate attachment for processing
 		$validation_result = $this->validate_attachment_for_processing($attachment_id);
 		if (! $validation_result['valid']) {
-			error_log('PhotoBooster AI: Attachment validation failed for ID ' . $attachment_id . ': ' . $validation_result['error']);
 			return new WP_REST_Response(
 				array(
 					'success' => false,
@@ -134,8 +132,6 @@ class Photobooster_Ai_REST
 		}
 
 		// Log the generation attempt
-		error_log(sprintf('PhotoBooster AI: Starting image generation for attachment %d with preset: %s', $attachment_id, $preset_id));
-
 		try {
 			// Call NextJS API integration
 			$api_result = $this->call_nextjs_api($file_path, $preset_id, $additional_instructions);
@@ -168,8 +164,6 @@ class Photobooster_Ai_REST
 				200
 			);
 		} catch (Exception $e) {
-			error_log(sprintf('PhotoBooster AI: Image generation failed for attachment %d: %s', $attachment_id, $e->getMessage()));
-
 			return new WP_REST_Response(
 				array(
 					'success' => false,
@@ -327,7 +321,6 @@ class Photobooster_Ai_REST
 
 		// Validate API key exists
 		if (empty($api_key)) {
-			error_log('PhotoBooster AI: No API key configured. Please check plugin settings.');
 			return array(
 				'success' => false,
 				'error' => 'API key not configured. Please check plugin settings.',
@@ -341,7 +334,6 @@ class Photobooster_Ai_REST
 		// Get image file contents
 		$image_contents = file_get_contents($file_path);
 		if (false === $image_contents) {
-			error_log('PhotoBooster AI: Failed to read image file: ' . $file_path);
 			return array(
 				'success' => false,
 				'error' => 'Failed to read image file',
@@ -352,7 +344,6 @@ class Photobooster_Ai_REST
 		// Get image mime type
 		$image_info = getimagesize($file_path);
 		if (false === $image_info) {
-			error_log('PhotoBooster AI: Failed to get image info for: ' . $file_path);
 			return array(
 				'success' => false,
 				'error' => 'Failed to get image information',
@@ -384,7 +375,6 @@ class Photobooster_Ai_REST
 		$response = wp_remote_post($nextjs_api_url, $args);
 
 		if (is_wp_error($response)) {
-			error_log('PhotoBooster AI: NextJS API request failed: ' . $response->get_error_message());
 			return array(
 				'success' => false,
 				'error' => 'API request failed: ' . $response->get_error_message(),
@@ -396,7 +386,6 @@ class Photobooster_Ai_REST
 
 		// Handle authentication failures
 		if (in_array($response_code, array(401, 403))) {
-			error_log('PhotoBooster AI: Authentication failed with code: ' . $response_code);
 
 			return array(
 				'success' => false,
@@ -407,7 +396,6 @@ class Photobooster_Ai_REST
 
 		if (200 !== $response_code) {
 			$error_message = $this->parse_api_error_response($response, $response_code);
-			error_log('PhotoBooster AI: NextJS API returned error code: ' . $response_code . ' - ' . $error_message);
 			return array(
 				'success' => false,
 				'error' => $error_message,
@@ -425,7 +413,6 @@ class Photobooster_Ai_REST
 				$error_message = $this->extract_readable_error($response_data['error']);
 			}
 
-			error_log('PhotoBooster AI: NextJS API returned error: ' . $error_message);
 			return array(
 				'success' => false,
 				'error' => $error_message,
@@ -434,7 +421,6 @@ class Photobooster_Ai_REST
 		}
 
 		if (! isset($response_data['image'])) {
-			error_log('PhotoBooster AI: NextJS API response missing image data');
 			return array(
 				'success' => false,
 				'error' => 'API response missing image data',
@@ -521,7 +507,6 @@ class Photobooster_Ai_REST
 		// Get original attachment info
 		$original_attachment = get_post($original_attachment_id);
 		if (! $original_attachment) {
-			error_log('PhotoBooster AI: Original attachment not found: ' . $original_attachment_id);
 			return false;
 		}
 
@@ -536,14 +521,12 @@ class Photobooster_Ai_REST
 		// Decode base64 image data
 		$image_data = base64_decode($base64_image_data);
 		if (false === $image_data) {
-			error_log('PhotoBooster AI: Failed to decode base64 image data');
 			return false;
 		}
 
 		// Get WordPress uploads directory
 		$upload_dir = wp_upload_dir();
 		if ($upload_dir['error']) {
-			error_log('PhotoBooster AI: Upload directory error: ' . $upload_dir['error']);
 			return false;
 		}
 
@@ -553,7 +536,6 @@ class Photobooster_Ai_REST
 		// Save image file
 		$bytes_written = file_put_contents($new_file_path, $image_data);
 		if (false === $bytes_written) {
-			error_log('PhotoBooster AI: Failed to write image file: ' . $new_file_path);
 			return false;
 		}
 
@@ -561,8 +543,7 @@ class Photobooster_Ai_REST
 		$file_type = wp_check_filetype($new_filename);
 		if (! $file_type['type']) {
 			// Clean up file if MIME type detection fails
-			unlink($new_file_path);
-			error_log('PhotoBooster AI: Invalid file type for: ' . $new_filename);
+			wp_delete_file($new_file_path);
 			return false;
 		}
 
@@ -580,8 +561,7 @@ class Photobooster_Ai_REST
 		$attachment_id = wp_insert_attachment($attachment_data, $new_file_path);
 		if (is_wp_error($attachment_id)) {
 			// Clean up file if database insertion fails
-			unlink($new_file_path);
-			error_log('PhotoBooster AI: Failed to insert attachment: ' . $attachment_id->get_error_message());
+			wp_delete_file($new_file_path);
 			return false;
 		}
 
@@ -597,12 +577,6 @@ class Photobooster_Ai_REST
 
 		// Get the new attachment URL
 		$attachment_url = wp_get_attachment_url($attachment_id);
-
-		error_log(sprintf(
-			'PhotoBooster AI: Successfully created new attachment %d from original %d',
-			$attachment_id,
-			$original_attachment_id
-		));
 
 		return array(
 			'id'  => $attachment_id,
