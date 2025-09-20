@@ -1,31 +1,31 @@
 {
-  "_App-DB4f3PbG.css": {
-    "file": "assets/App-DB4f3PbG.css",
-    "src": "_App-DB4f3PbG.css"
+  "_App-897NPRv-.css": {
+    "file": "assets/App-897NPRv-.css",
+    "src": "_App-897NPRv-.css"
   },
-  "_App-DSrQhcdn.js": {
-    "file": "assets/App-DSrQhcdn.js",
+  "_App-DDFjcA32.js": {
+    "file": "assets/App-DDFjcA32.js",
     "name": "App",
     "css": [
-      "assets/App-DB4f3PbG.css"
+      "assets/App-897NPRv-.css"
     ]
   },
   "index.html": {
-    "file": "assets/app-BBHx9Quo.js",
+    "file": "assets/app-fZqbUOiD.js",
     "name": "app",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_App-DSrQhcdn.js"
+      "_App-DDFjcA32.js"
     ]
   },
   "src/mount.tsx": {
-    "file": "assets/mount-B5MecO1Q.js",
+    "file": "assets/mount-C76Zfc6W.js",
     "name": "mount",
     "src": "src/mount.tsx",
     "isEntry": true,
     "imports": [
-      "_App-DSrQhcdn.js"
+      "_App-DDFjcA32.js"
     ],
     "css": [
       "assets/mount-tn0RQdqM.css"

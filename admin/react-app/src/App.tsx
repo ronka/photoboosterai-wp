@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
+import { PresetSelector } from './components/preset-selector'
 
 interface Attachment {
     id: number
@@ -232,22 +233,7 @@ function App({ attachment, onClose }: AppProps) {
                         {/* Configuration Options */}
                         <div className="pbai-config-section">
                             <div className="pbai-form-group">
-                                <label htmlFor="numberOfPhotos">Number of Photos:</label>
-                                <select
-                                    id="numberOfPhotos"
-                                    value={numberOfPhotos}
-                                    onChange={(e) => setNumberOfPhotos(e.target.value)}
-                                    className="pbai-select"
-                                >
-                                    <option value="1">1 Photo</option>
-                                    <option value="2">2 Photos</option>
-                                    <option value="3">3 Photos</option>
-                                    <option value="4">4 Photos</option>
-                                    <option value="5">5 Photos</option>
-                                    <option value="6">6 Photos</option>
-                                    <option value="8">8 Photos</option>
-                                    <option value="10">10 Photos</option>
-                                </select>
+                                <PresetSelector />
                             </div>
 
                             <div className="pbai-form-group">
