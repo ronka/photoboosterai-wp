@@ -54,6 +54,72 @@
     box-sizing: border-box;
 }
 
+/* Header styles */
+.pbai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e1e5e9;
+    background: #fff;
+    position: relative;
+}
+
+.pbai-header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pbai-credits-display {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+}
+
+.pbai-credits-count {
+    color: #666;
+    font-weight: 500;
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid #e1e5e9;
+}
+
+.pbai-credits-link {
+    color: #007cba;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: #f0f8ff;
+    border: 1px solid #b3d8ff;
+    transition: all 0.2s ease;
+}
+
+.pbai-credits-link:hover {
+    background: #e6f3ff;
+    color: #005a87;
+    text-decoration: none;
+}
+
+.pbai-credits-loading {
+    color: #666;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.pbai-credits-error {
+    color: #dc3545;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: help;
+}
+
 @media (prefers-color-scheme: light) {
     .pbai-overlay {
         color: #213547;

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { PresetSelector } from './components/preset-selector'
+import { useCredits } from './hooks/useCredits'
+import { CreditsDisplay } from './components/CreditsDisplay'
 
 interface Attachment {
     id: number
@@ -22,6 +24,12 @@ interface GeneratedPhoto {
     timestamp: Date
 }
 
+interface CreditsData {
+    credits: number
+    lastResetDate?: string
+    userId?: string
+}
+
 interface AppProps {
     attachment?: Attachment
     onClose?: () => void
@@ -34,6 +42,7 @@ function App({ attachment, onClose }: AppProps) {
     const [additionalInstructions, setAdditionalInstructions] = useState('')
     const [generatedPhotos, setGeneratedPhotos] = useState<GeneratedPhoto[]>([])
     const [selectedImagePopup, setSelectedImagePopup] = useState<GeneratedPhoto | null>(null)
+    const { credits, creditsLoading, creditsError } = useCredits()
     const modalRef = useRef<HTMLDivElement>(null)
     const closeButtonRef = useRef<HTMLButtonElement>(null)
     const imagePopupRef = useRef<HTMLDivElement>(null)
@@ -155,6 +164,7 @@ function App({ attachment, onClose }: AppProps) {
         }
     }, [onClose])
 
+
     // Prevent background scroll
     useEffect(() => {
         document.body.style.overflow = 'hidden'
@@ -176,19 +186,30 @@ function App({ attachment, onClose }: AppProps) {
         return seedImage.url
     }
 
+
     return (
         <div className="pbai-overlay">
             <div className="pbai-modal" ref={modalRef}>
                 <header className="pbai-header">
-                    <h2>✨ AI Photo Generator</h2>
-                    <button
-                        ref={closeButtonRef}
-                        className="pbai-close"
-                        onClick={handleClose}
-                        aria-label="Close"
-                    >
-                        ×
-                    </button>
+                    <div className="flex gap-4">
+                        <h2>✨ AI Photo Generator</h2>
+                        <CreditsDisplay
+                            credits={credits}
+                            creditsLoading={creditsLoading}
+                            creditsError={creditsError}
+                        />
+                    </div>
+
+                    <div className="pbai-header-right">
+                        <button
+                            ref={closeButtonRef}
+                            className="pbai-close"
+                            onClick={handleClose}
+                            aria-label="Close"
+                        >
+                            ×
+                        </button>
+                    </div>
                 </header>
 
                 <div className="pbai-main-content">

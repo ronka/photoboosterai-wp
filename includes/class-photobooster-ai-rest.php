@@ -79,6 +79,19 @@ class Photobooster_Ai_REST
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/credits',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array($this, 'route_get_credits'),
+					'permission_callback' => array($this, 'permissions_uploaders_with_nonce'),
+				),
+			),
+			array('args' => array())
+		);
 	}
 
 	/**
@@ -90,6 +103,101 @@ class Photobooster_Ai_REST
 	public function route_noop($request)
 	{ // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
 		return new WP_REST_Response(array('ok' => true), 200);
+	}
+
+	/**
+	 * Get user credits from the API.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function route_get_credits($request)
+	{ // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
+		// Get API configuration from settings
+		$settings = get_option('photobooster_ai_settings', array());
+		$crypto = new Photobooster_Ai_Crypto();
+
+		// Get decrypted API key
+		$api_key = '';
+		if (!empty($settings['api_key'])) {
+			$api_key = $crypto->decrypt_api_key($settings['api_key']);
+		}
+
+		// Check if API key is configured
+		if (empty($api_key)) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'error'   => 'API key not configured',
+					'code'    => 'no_api_key'
+				),
+				400
+			);
+		}
+
+		// Get credits API endpoint
+		$credits_api_url = photobooster_ai_get_credits_endpoint();
+
+		// Make request to credits API
+		$response = wp_remote_get(
+			add_query_arg('apiKey', urlencode($api_key), $credits_api_url),
+			array(
+				'timeout' => 30,
+				'headers' => array(
+					'Content-Type' => 'application/json',
+					'User-Agent' => 'PhotoBooster-AI-Plugin/' . PHOTOBOOSTER_AI_VERSION,
+				),
+			)
+		);
+
+		if (is_wp_error($response)) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'error'   => 'Failed to connect to credits API: ' . $response->get_error_message(),
+					'code'    => 'api_connection_error'
+				),
+				500
+			);
+		}
+
+		$status_code = wp_remote_retrieve_response_code($response);
+		$body = wp_remote_retrieve_body($response);
+
+		if ($status_code !== 200) {
+			$error_data = json_decode($body, true);
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'error'   => isset($error_data['error']) ? $error_data['error'] : 'Credits API request failed with status ' . $status_code,
+					'code'    => 'api_error'
+				),
+				$status_code
+			);
+		}
+
+		$data = json_decode($body, true);
+
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'error'   => 'Invalid JSON response from credits API',
+					'code'    => 'invalid_response'
+				),
+				500
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'success' => true,
+				'credits' => $data['credits'] ?? 0,
+				'lastResetDate' => $data['lastResetDate'] ?? null,
+				'userId' => $data['userId'] ?? null
+			),
+			200
+		);
 	}
 
 	/**
