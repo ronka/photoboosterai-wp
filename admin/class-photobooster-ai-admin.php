@@ -59,7 +59,7 @@ class Photobooster_Ai_Admin
 	 */
 	const REST_NAMESPACE = 'photobooster-ai/v1';
 	const REST_NONCE_ACTION = 'wp_rest';
-	const LOCALIZE_OBJECT_NAME = 'PBAIEnhance';
+	const LOCALIZE_OBJECT_NAME = 'photoboosterAiData';
 
 	// =============================================================================
 	// PROPERTIES
@@ -527,6 +527,9 @@ class Photobooster_Ai_Admin
 	/**
 	 * Render the product enhancement script.
 	 *
+	 * Passes attachment data to the bootstrap script via wp_add_inline_script()
+	 * so the JS can inject the enhance button without raw inline <script> tags.
+	 *
 	 * @since 1.0.0
 	 * @param array $attachment_data The attachment data array.
 	 */
@@ -536,135 +539,26 @@ class Photobooster_Ai_Admin
 		$attachment    = $attachment_data['attachment'];
 		$image_url     = $attachment_data['image_url'];
 
-?>
-		<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				if ($('#postimagediv .inside').length && !$('#pbai-product-enhance-btn').length) {
-					var enhanceBtn = $('<button>', {
-						id: 'pbai-product-enhance-btn',
-						type: 'button',
-						class: 'button button-primary',
-						text: '✨ AI Enhance Product Image',
-						style: 'margin-top: 10px; width: 100%;'
-					});
+		$data = array(
+			'id'       => intval($attachment_id),
+			'title'    => $attachment->post_title,
+			'filename' => $attachment_data['filename'],
+			'url'      => $image_url,
+			'mime'     => $attachment->post_mime_type,
+			'alt'      => $attachment_data['alt_text'],
+			'sizes'    => array(
+				'full'      => array('url' => $image_url),
+				'large'     => array('url' => wp_get_attachment_image_url($attachment_id, 'large')),
+				'medium'    => array('url' => wp_get_attachment_image_url($attachment_id, 'medium')),
+				'thumbnail' => array('url' => wp_get_attachment_image_url($attachment_id, 'thumbnail')),
+			),
+		);
 
-					enhanceBtn.on('click', function(e) {
-						e.preventDefault();
-
-						var attachment = {
-							id: <?php echo intval($attachment_id); ?>,
-							title: <?php echo wp_json_encode($attachment->post_title); ?>,
-							filename: <?php echo wp_json_encode($attachment_data['filename']); ?>,
-							url: <?php echo wp_json_encode($image_url); ?>,
-							mime: <?php echo wp_json_encode($attachment->post_mime_type); ?>,
-							alt: <?php echo wp_json_encode($attachment_data['alt_text']); ?>,
-							sizes: {
-								full: {
-									url: <?php echo wp_json_encode($image_url); ?>
-								},
-								large: {
-									url: <?php echo wp_json_encode(wp_get_attachment_image_url($attachment_id, 'large')); ?>
-								},
-								medium: {
-									url: <?php echo wp_json_encode(wp_get_attachment_image_url($attachment_id, 'medium')); ?>
-								},
-								thumbnail: {
-									url: <?php echo wp_json_encode(wp_get_attachment_image_url($attachment_id, 'thumbnail')); ?>
-								}
-							},
-							get: function(key) {
-								return this[key];
-							}
-						};
-
-						var modalContainer = $('<div>', {
-							id: 'pbai-product-enhance-modal',
-							style: 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100000; display: flex; align-items: center; justify-content: center;'
-						});
-
-						modalContainer.on('click', function(e) {
-							if (e.target === this) {
-								$(this).remove();
-							}
-						});
-
-						$('body').append(modalContainer);
-
-						var entry = window.PBAIEnhance && window.PBAIEnhance.manifest && window.PBAIEnhance.manifest['src/mount.tsx'];
-						var distUrl = window.PBAIEnhance && window.PBAIEnhance.distUrl || '';
-
-						if (entry && entry.css) {
-							entry.css.forEach(function(css) {
-								var href = distUrl + css;
-								if (!document.querySelector('link[data-pbai-css="' + href + '"]')) {
-									var link = document.createElement('link');
-									link.rel = 'stylesheet';
-									link.href = href;
-									link.setAttribute('data-pbai-css', href);
-									document.head.appendChild(link);
-								}
-							});
-						}
-
-						var manifest = window.PBAIEnhance && window.PBAIEnhance.manifest || {};
-						Object.keys(manifest).forEach(function(key) {
-							var manifestEntry = manifest[key];
-							if (manifestEntry.css && manifestEntry.css.length > 0) {
-								manifestEntry.css.forEach(function(css) {
-									var href = distUrl + css;
-									if (!document.querySelector('link[data-pbai-css="' + href + '"]')) {
-										var link = document.createElement('link');
-										link.rel = 'stylesheet';
-										link.href = href;
-										link.setAttribute('data-pbai-css', href);
-										document.head.appendChild(link);
-									}
-								});
-							}
-						});
-
-						if (typeof window.mountAppIntoModal === 'function') {
-							window.mountAppIntoModal(modalContainer[0], attachment);
-						} else {
-							if (entry && entry.file) {
-								var jsUrl = distUrl + entry.file;
-
-								import(jsUrl).then(function(mod) {
-									var mountAppFn = mod.mountApp || window.PBAIMountApp;
-									if (typeof mountAppFn === 'function') {
-										var mountNode = $('<div>', {
-											id: 'pbai-enhance-root',
-											style: 'background: white; border-radius: 8px; max-width: 90vw; max-height: 90vh; overflow: auto;'
-										})[0];
-										modalContainer.append(mountNode);
-
-										mountNode.addEventListener('pbai:close', function() {
-											modalContainer.remove();
-										});
-
-										mountAppFn(mountNode, {
-											attachment: attachment
-										});
-									} else {
-										modalContainer.remove();
-										alert('Failed to load AI Enhance app.');
-									}
-								}).catch(function() {
-									modalContainer.remove();
-									alert('Failed to load AI Enhance app.');
-								});
-							} else {
-								modalContainer.remove();
-								alert('AI Enhance app not properly configured.');
-							}
-						}
-					});
-
-					$('#postimagediv .inside').append($('<p>').append(enhanceBtn));
-				}
-			});
-		</script>
-<?php
+		wp_add_inline_script(
+			$this->get_bootstrap_script_handle(),
+			'window.pbaiProductData = ' . wp_json_encode($data) . ';',
+			'before'
+		);
 	}
 
 	/**
@@ -675,7 +569,7 @@ class Photobooster_Ai_Admin
 	public function handle_credits_check()
 	{
 		// Verify nonce for security
-		if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'wp_rest')) {
+		if (!isset($_POST['nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'wp_rest')) {
 			wp_send_json_error(array('message' => 'Security check failed'));
 		}
 

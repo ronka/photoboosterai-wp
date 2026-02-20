@@ -65,7 +65,7 @@ function App({ attachment, onClose }: AppProps) {
 
         try {
             // Get WordPress REST API settings
-            const wpSettings = (window as any).PBAIEnhance
+            const wpSettings = (window as any).photoboosterAiData
             if (!wpSettings) {
                 throw new Error('WordPress API settings not found')
             }

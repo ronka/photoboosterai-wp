@@ -6,9 +6,9 @@ import { useState, useEffect } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { createPortal } from "react-dom"
 
-// Get the assets URL from the global PBAIEnhance object
+// Get the assets URL from the global photoboosterAiData object
 const getAssetsUrl = () => {
-    return (window as any).PBAIEnhance?.assetsUrl || ''
+    return (window as any).photoboosterAiData?.assetsUrl || ''
 }
 
 const getPresets = () => {

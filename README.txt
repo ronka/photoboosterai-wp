@@ -89,3 +89,30 @@ Absolutely. All API keys are encrypted and stored securely. Images are processed
 
 = 1.0.0 =
 Initial release with full AI image enhancement capabilities. Upgrade from any previous version to access all features.
+
+== External Services ==
+
+This plugin connects to the PhotoBooster AI service to generate enhanced product images and to check API credit balances.
+
+**Service**: PhotoBooster AI (https://photobooster-ai.vercel.app)
+
+**What data is sent and when**:
+
+* When a user clicks "AI Enhance": the product image URL and the user's API key are sent to the PhotoBooster AI API to generate enhanced images.
+* When a user clicks "Check Credits": the user's API key is sent to the PhotoBooster AI API to retrieve the remaining credit balance.
+* No data is sent automatically in the background; all API calls require explicit user action.
+
+**Terms of Service**: https://photobooster-ai.vercel.app/terms
+**Privacy Policy**: https://photobooster-ai.vercel.app/privacy
+
+== Source Code ==
+
+The admin UI is built with React 19, TypeScript, Vite, and Tailwind CSS. The source lives in the `admin/react-app/` directory inside the plugin folder.
+
+To rebuild the compiled assets:
+
+1. `cd admin/react-app`
+2. `npm install`
+3. `npm run build`
+
+The build output is written to `admin/dist/`.
