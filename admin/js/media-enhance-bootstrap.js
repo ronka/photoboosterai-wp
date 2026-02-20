@@ -137,7 +137,7 @@
      * @returns {string} Distribution URL or empty string if not available
      */
     function getDistUrl() {
-        return (window.photoboosterAiData && window.photoboosterAiData.distUrl) || '';
+        return (window.photobooster_ai_enhance && window.photobooster_ai_enhance.distUrl) || '';
     }
 
     /**
@@ -198,7 +198,7 @@
      * @returns {Object|null} Manifest entry object or null if not found
      */
     function getManifestEntry(key) {
-        const map = (window.photoboosterAiData && window.photoboosterAiData.manifest) || {};
+        const map = (window.photobooster_ai_enhance && window.photobooster_ai_enhance.manifest) || {};
         const entry = map[key];
 
         if (entry) {
@@ -250,7 +250,7 @@
      * @param {Object} entry - Manifest entry containing CSS files
      */
     function ensureStyleInjected(entry) {
-        const manifest = (window.photoboosterAiData && window.photoboosterAiData.manifest) || {};
+        const manifest = (window.photobooster_ai_enhance && window.photobooster_ai_enhance.manifest) || {};
 
         /**
          * Injects CSS files from a single manifest entry
@@ -718,59 +718,6 @@
 
         // Initialize for any already-present containers
         initializeExistingContainers();
-    });
-
-    /**
-     * Product image box button injection (WooCommerce product edit pages).
-     * Reads attachment data from window.pbaiProductData set by wp_add_inline_script().
-     */
-    $(function () {
-        if (typeof window.pbaiProductData === 'undefined') return;
-
-        var productData = window.pbaiProductData;
-
-        if (!$('#postimagediv .inside').length || $('#pbai-product-enhance-btn').length) return;
-
-        var $enhanceBtn = $('<button>', {
-            id: 'pbai-product-enhance-btn',
-            type: 'button',
-            'class': 'button button-primary',
-            text: '✨ AI Enhance Product Image',
-            style: 'margin-top: 10px; width: 100%;'
-        });
-
-        $enhanceBtn.on('click', function (e) {
-            e.preventDefault();
-
-            var attachment = {
-                id: productData.id,
-                title: productData.title,
-                filename: productData.filename,
-                url: productData.url,
-                mime: productData.mime,
-                alt: productData.alt,
-                sizes: productData.sizes,
-                get: function (key) {
-                    return this[key];
-                }
-            };
-
-            var $modalContainer = $('<div>', {
-                id: 'pbai-product-enhance-modal',
-                style: 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100000; display: flex; align-items: center; justify-content: center;'
-            });
-
-            $modalContainer.on('click', function (e) {
-                if (e.target === this) {
-                    $(this).remove();
-                }
-            });
-
-            $('body').append($modalContainer);
-            mountAppIntoModal($modalContainer[0], attachment);
-        });
-
-        $('#postimagediv .inside').append($('<p>').append($enhanceBtn));
     });
 
 })(jQuery);

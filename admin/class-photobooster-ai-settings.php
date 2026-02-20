@@ -127,7 +127,7 @@ class Photobooster_Ai_Settings
     {
         // Check user capabilities
         if (!$this->user_has_permissions()) {
-            wp_die(esc_html(__('You do not have sufficient permissions to access this page.', 'photobooster-ai')));
+            wp_die(esc_html(__('You do not have sufficient permissions to access this page.', 'ecommerce-product-photo-booster-ai')));
         }
 
         include_once 'partials/photobooster-ai-settings-display.php';

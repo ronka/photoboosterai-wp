@@ -1,14 +1,14 @@
 === eCommerce Product Photo Booster AI ===
 Contributors: photobooster-ai
 Donate link: https://photobooster-ai.vercel.app/
-Tags: ai, image-generation, product-photos, e-commerce, photography, marketing
+Tags: ai, image-generation, product-photos, e-commerce, photography
 Requires at least: 5.0
 Tested up to: 6.8
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Generate studio-quality images from a single photo—no expensive gear, no photo shoots. Upload your product, and within seconds, get polished photos with clean backgrounds, lifestyle mockups, and marketing-ready variations.
+Create studio-quality product photos from one image—clean backgrounds, lifestyle scenes, and marketing-ready variants.
 
 == Description ==
 
@@ -92,27 +92,32 @@ Initial release with full AI image enhancement capabilities. Upgrade from any pr
 
 == External Services ==
 
-This plugin connects to the PhotoBooster AI service to generate enhanced product images and to check API credit balances.
+This plugin connects to the PhotoBooster AI API to generate and enhance product images. The API is required for the core functionality of this plugin.
 
-**Service**: PhotoBooster AI (https://photobooster-ai.vercel.app)
+**What the service does:** The PhotoBooster AI API receives your product image and returns AI-generated enhanced versions (e.g., clean backgrounds, lifestyle scenes, marketing variants).
 
-**What data is sent and when**:
+**What data is sent and when:**
 
-* When a user clicks "AI Enhance": the product image URL and the user's API key are sent to the PhotoBooster AI API to generate enhanced images.
-* When a user clicks "Check Credits": the user's API key is sent to the PhotoBooster AI API to retrieve the remaining credit balance.
-* No data is sent automatically in the background; all API calls require explicit user action.
+* Your product image (as a URL or binary data) is sent to the API each time you click the "AI Enhance" button.
+* Your API key is sent with every request to authenticate your account.
+* No other personal or site data is transmitted.
 
-**Terms of Service**: https://photobooster-ai.vercel.app/terms
-**Privacy Policy**: https://photobooster-ai.vercel.app/privacy
+**Service provider:** PhotoBooster AI (https://photobooster-ai.vercel.app)
+
+* Terms of Service: https://photobooster-ai.vercel.app/terms
+* Privacy Policy: https://photobooster-ai.vercel.app/privacy
 
 == Source Code ==
 
-The admin UI is built with React 19, TypeScript, Vite, and Tailwind CSS. The source lives in the `admin/react-app/` directory inside the plugin folder.
+The admin UI of this plugin is built with React and compiled using Vite. The compiled (minified) files are located in `admin/dist/assets/`. The full, human-readable source code is publicly available at:
 
-To rebuild the compiled assets:
+https://github.com/ronka/photoboosterai-wp
 
-1. `cd admin/react-app`
-2. `npm install`
-3. `npm run build`
+**Building from source:**
 
-The build output is written to `admin/dist/`.
+1. Clone the repository: `git clone https://github.com/ronka/photoboosterai-wp.git`
+2. Navigate to the React app directory: `cd admin/react-app`
+3. Install dependencies: `npm install`
+4. Build for production: `npm run build`
+
+The build output will be placed in `admin/dist/`.

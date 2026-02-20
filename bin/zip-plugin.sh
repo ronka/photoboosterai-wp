@@ -14,6 +14,7 @@ set -euo pipefail
 PLUGIN_SLUG="ecommerce-product-photo-booster-ai"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+PLUGIN_FOLDER="$(basename "$PLUGIN_DIR")"
 OUT_DIR="${1:-"$PLUGIN_DIR/.."}"
 OUT_DIR="$(cd "$OUT_DIR" && pwd)"
 ZIP_PATH="$OUT_DIR/${PLUGIN_SLUG}.zip"
@@ -51,13 +52,13 @@ rm -f "$ZIP_PATH"
 echo "==> Creating zip…"
 cd "$PLUGINS_DIR"
 
-zip -r "$ZIP_PATH" "$PLUGIN_SLUG" \
-    --exclude "$PLUGIN_SLUG/.git/*" \
-    --exclude "$PLUGIN_SLUG/.gitignore" \
-    --exclude "$PLUGIN_SLUG/.cursor/*" \
-    --exclude "$PLUGIN_SLUG/bin/*" \
-    --exclude "$PLUGIN_SLUG/review.md" \
-    --exclude "$PLUGIN_SLUG/admin/react-app/*" \
+zip -r "$ZIP_PATH" "$PLUGIN_FOLDER" \
+    --exclude "$PLUGIN_FOLDER/.git/*" \
+    --exclude "$PLUGIN_FOLDER/.gitignore" \
+    --exclude "$PLUGIN_FOLDER/.cursor/*" \
+    --exclude "$PLUGIN_FOLDER/bin/*" \
+    --exclude "$PLUGIN_FOLDER/review.md" \
+    --exclude "$PLUGIN_FOLDER/admin/react-app/*" \
     --exclude "*/.DS_Store" \
     --exclude "*/__MACOSX/*" \
     --exclude "*/node_modules/*" \
