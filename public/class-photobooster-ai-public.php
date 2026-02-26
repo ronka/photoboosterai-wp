@@ -3,7 +3,7 @@
 /**
  * The public-facing functionality of the plugin.
  *
- * @link       https://photobooster-ai.vercel.app
+ * @link       https://photoboosterai.com
  * @since      1.0.0
  *
  * @package    Photobooster_Ai

@@ -6,7 +6,7 @@
  * Loads and defines the internationalization files for this plugin
  * so that it is ready for translation.
  *
- * @link       https://photobooster-ai.vercel.app
+ * @link       https://photoboosterai.com
  * @since      1.0.0
  *
  * @package    Photobooster_Ai

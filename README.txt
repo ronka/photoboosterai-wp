@@ -1,6 +1,6 @@
 === eCommerce Product Photo Booster AI ===
 Contributors: photobooster-ai
-Donate link: https://photobooster-ai.vercel.app/
+Donate link: https://photoboosterai.com/
 Tags: ai, image-generation, product-photos, e-commerce, photography
 Requires at least: 5.0
 Tested up to: 6.9
@@ -44,14 +44,14 @@ Create studio-quality product photos from one image—clean backgrounds, lifesty
 1. Upload the `photobooster-ai` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. Navigate to Settings > PhotoBooster AI Settings
-4. Enter your API key (obtain from [photobooster-ai.vercel.app](https://photobooster-ai.vercel.app))
+4. Enter your API key (obtain from [photoboosterai.com](https://photoboosterai.com))
 5. Configure your preferences and start enhancing images
 
 == Frequently Asked Questions ==
 
 = How do I get an API key? =
 
-Visit [photobooster-ai.vercel.app](https://photobooster-ai.vercel.app) to sign up and obtain your API key.
+Visit [photoboosterai.com](https://photoboosterai.com) to sign up and obtain your API key.
 
 = What image formats are supported? =
 
@@ -59,7 +59,7 @@ The plugin works with JPEG, PNG, and WebP formats. Recommended minimum resolutio
 
 = How many images can I process? =
 
-Processing limits depend on your API plan. Check your account at [photobooster-ai.vercel.app](https://photobooster-ai.vercel.app) for details.
+Processing limits depend on your API plan. Check your account at [photoboosterai.com](https://photoboosterai.com) for details.
 
 = Can I customize the AI generation? =
 
@@ -102,10 +102,10 @@ This plugin connects to the PhotoBooster AI API to generate and enhance product 
 * Your API key is sent with every request to authenticate your account.
 * No other personal or site data is transmitted.
 
-**Service provider:** PhotoBooster AI (https://photobooster-ai.vercel.app)
+**Service provider:** PhotoBooster AI (https://photoboosterai.com)
 
-* Terms of Service: https://photobooster-ai.vercel.app/terms
-* Privacy Policy: https://photobooster-ai.vercel.app/privacy
+* Terms of Service: https://photoboosterai.com/terms
+* Privacy Policy: https://photoboosterai.com/privacy
 
 == Source Code ==
 

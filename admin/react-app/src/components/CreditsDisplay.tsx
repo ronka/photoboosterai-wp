@@ -34,7 +34,7 @@ export function CreditsDisplay({ credits, creditsLoading, creditsError }: Credit
         return (
             <div className="pbai-credits-display">
                 <a
-                    href="https://photobooster-ai.vercel.app/pricing"
+                    href="https://photoboosterai.com/pricing"
                     className="pbai-credits-link"
                     target="_blank"
                     rel="noopener noreferrer"

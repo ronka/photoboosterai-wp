@@ -85,7 +85,7 @@ This service is provided by "PRT Weather INC": terms of use, privacy policy.
 Example(s) from your plugin:
 # Domain(s) mentioned in the readme file. Links to service terms and/or privacy policy not found.
 ecommerce-product-photo-booster-ai.php:67 $base_url = PHOTOBOOSTER_AI_BASE_URL;
-# ↳ Detected: https://photobooster-ai.vercel.app
+# ↳ Detected: https://photoboosterai.com
 
 
 

@@ -3,7 +3,7 @@
 /**
  * Fired during plugin activation
  *
- * @link       https://photobooster-ai.vercel.app
+ * @link       https://photoboosterai.com
  * @since      1.0.0
  *
  * @package    Photobooster_Ai

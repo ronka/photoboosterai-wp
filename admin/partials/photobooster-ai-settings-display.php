@@ -37,7 +37,7 @@ if (!defined('WPINC')) {
                             <h4 style="margin-top: 0; color: #0c5460;">Getting Started</h4>
                             <p style="margin-bottom: 10px;">To get your API key or purchase more credits:</p>
                             <ol style="margin: 10px 0; padding-left: 20px;">
-                                <li>Visit <a href="https://photobooster-ai.vercel.app" target="_blank" style="color: #0066cc;">https://photobooster-ai.vercel.app</a></li>
+                                <li>Visit <a href="https://photoboosterai.com" target="_blank" style="color: #0066cc;">https://photoboosterai.com</a></li>
                                 <li>Login with the same user account you used to create your API key</li>
                                 <li>Navigate to your account settings to view your API key or purchase additional credits</li>
                             </ol>
@@ -65,4 +65,3 @@ if (!defined('WPINC')) {
         </div>
     </div>
 </div>
-

@@ -8,17 +8,17 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              https://photobooster-ai.vercel.app
+ * @link              https://photoboosterai.com
  * @since             1.0.0
  * @package           Photobooster_Ai
  *
  * @wordpress-plugin
  * Plugin Name:       eCommerce Product Photo Booster AI
- * Plugin URI:        https://photobooster-ai.vercel.app
+ * Plugin URI:        https://photoboosterai.com
  * Description:       Generate studio-quality images from a single photo—no expensive gear, no photo shoots. Upload your product, and within seconds, get polished photos with clean backgrounds, lifestyle mockups, and marketing-ready variations.
  * Version:           1.0.0
  * Author:            PhotoBooster AI
- * Author URI:        https://photobooster-ai.vercel.app/
+ * Author URI:        https://photoboosterai.com/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       ecommerce-product-photo-booster-ai
@@ -40,7 +40,7 @@ define('PHOTOBOOSTER_AI_VERSION', '1.0.0');
 /**
  * API Configuration constants.
  */
-define('PHOTOBOOSTER_AI_BASE_URL', 'https://photobooster-ai.vercel.app');
+define('PHOTOBOOSTER_AI_BASE_URL', 'https://photoboosterai.com');
 define('PHOTOBOOSTER_AI_API_BASE_PATH', 'api');
 define('PHOTOBOOSTER_AI_API_TIMEOUT', 60);
 define('PHOTOBOOSTER_AI_SETTINGS_CAPABILITY', 'manage_options');
