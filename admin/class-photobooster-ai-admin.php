@@ -276,7 +276,7 @@ class Photobooster_Ai_Admin
 			'distUrl'    => $this->get_admin_dist_url(),
 			'manifest'   => $this->get_vite_manifest_map(),
 			'pluginUrl'  => plugin_dir_url(__FILE__),
-			'assetsUrl'  => plugin_dir_url(__FILE__) . 'react-app/public/',
+			'assetsUrl'  => plugin_dir_url(__FILE__) . 'dist/',
 		);
 	}
 

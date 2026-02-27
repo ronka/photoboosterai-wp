@@ -97,3 +97,101 @@
     font-size: 14px;
     text-align: center;
 }
+
+/* Reference image section */
+.pbai-reference-section {
+    margin-bottom: 20px;
+}
+
+.pbai-reference-section h3 {
+    margin-bottom: 10px;
+}
+
+.pbai-optional-label {
+    font-size: 12px;
+    font-weight: 400;
+    color: #888;
+}
+
+.pbai-reference-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px;
+    border: 2px dashed #ddd;
+    border-radius: 6px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    user-select: none;
+}
+
+.pbai-reference-dropzone:hover,
+.pbai-reference-dropzone--active {
+    border-color: #0073aa;
+    background: #e8f4fb;
+}
+
+.pbai-reference-dropzone-icon {
+    font-size: 28px;
+}
+
+.pbai-reference-dropzone-text {
+    font-size: 13px;
+    color: #555;
+    text-align: center;
+}
+
+.pbai-reference-input {
+    display: none;
+}
+
+.pbai-reference-preview {
+    position: relative;
+    display: inline-block;
+}
+
+.pbai-reference-image {
+    max-width: 100%;
+    max-height: 150px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: block;
+}
+
+.pbai-reference-remove {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: #cc1818;
+    color: white;
+    font-size: 16px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.pbai-reference-remove:hover {
+    background: #a01010;
+}
+
+.pbai-reference-error {
+    margin-top: 6px;
+    color: #cc1818;
+    font-size: 13px;
+}
+
+.pbai-reference-hint {
+    margin-top: 8px;
+    color: #888;
+    font-size: 12px;
+}

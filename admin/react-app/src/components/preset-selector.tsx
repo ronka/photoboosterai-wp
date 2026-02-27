@@ -6,9 +6,9 @@ import { useState, useEffect } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { createPortal } from "react-dom"
 
-// Get the assets URL from the global photoboosterAiData object
+// Get the assets URL from the global photobooster_ai_enhance object
 const getAssetsUrl = () => {
-    return (window as any).photoboosterAiData?.assetsUrl || ''
+    return (window as any).photobooster_ai_enhance?.assetsUrl || ''
 }
 
 const getPresets = () => {

@@ -35,6 +35,18 @@ class Photobooster_Ai_REST
 
 		register_rest_route(
 			$this->namespace,
+			'/credits',
+			array(
+				array(
+					'methods'             => 'GET',
+					'callback'            => array($this, 'route_credits'),
+					'permission_callback' => array($this, 'permissions_uploaders_with_nonce'),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
 			'/generate-image',
 			array(
 				array(
@@ -93,6 +105,77 @@ class Photobooster_Ai_REST
 	}
 
 	/**
+	 * Return the current user's credit balance from the external API.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function route_credits()
+	{ // phpcs:ignore WordPress.NamingConventions.ValidFunctionName
+		$settings = get_option('photobooster_ai_settings', array());
+		$crypto   = new Photobooster_Ai_Crypto();
+
+		$api_key = '';
+		if (!empty($settings['api_key'])) {
+			$api_key = $crypto->decrypt_api_key($settings['api_key']);
+		}
+
+		if (empty($api_key)) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'error'   => 'API key not configured. Please check plugin settings.',
+				),
+				400
+			);
+		}
+
+		$credits_url = photobooster_ai_get_credits_endpoint();
+		$response    = wp_remote_get(
+			add_query_arg('apiKey', rawurlencode($api_key), $credits_url),
+			array(
+				'timeout' => PHOTOBOOSTER_AI_API_TIMEOUT,
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+			)
+		);
+
+		if (is_wp_error($response)) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'error'   => 'Failed to connect to API: ' . $response->get_error_message(),
+				),
+				502
+			);
+		}
+
+		$status_code = wp_remote_retrieve_response_code($response);
+		$body        = wp_remote_retrieve_body($response);
+		$data        = json_decode($body, true);
+
+		if ($status_code !== 200) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'error'   => isset($data['error']) ? $data['error'] : 'API request failed with status ' . $status_code,
+				),
+				$status_code
+			);
+		}
+
+		return new WP_REST_Response(
+			array(
+				'success'       => true,
+				'credits'       => $data['credits'] ?? 0,
+				'lastResetDate' => $data['lastResetDate'] ?? null,
+				'userId'        => $data['userId'] ?? null,
+			),
+			200
+		);
+	}
+
+	/**
 	 * Generate AI enhanced image from seed image.
 	 *
 	 * @param WP_REST_Request $request Request containing attachment_id, style, and optional additional_instructions.
@@ -131,10 +214,55 @@ class Photobooster_Ai_REST
 			);
 		}
 
+		// Handle optional reference image upload
+		$reference_file_path = null;
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if (isset($_FILES['reference_image']) && UPLOAD_ERR_OK === $_FILES['reference_image']['error']) {
+			$ref_file      = $_FILES['reference_image']; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+			$ref_allowed   = array('image/jpeg', 'image/jpg', 'image/png', 'image/webp');
+			$ref_max_bytes = 10 * 1024 * 1024; // 10MB
+
+			$ref_mime = isset($ref_file['type']) ? sanitize_mime_type($ref_file['type']) : '';
+			$ref_size = isset($ref_file['size']) ? (int) $ref_file['size'] : 0;
+			$ref_tmp  = isset($ref_file['tmp_name']) ? $ref_file['tmp_name'] : '';
+
+			if (! in_array($ref_mime, $ref_allowed, true)) {
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'error'   => 'Reference image must be a JPEG, PNG, or WebP file.',
+					),
+					400
+				);
+			}
+
+			if ($ref_size > $ref_max_bytes) {
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'error'   => 'Reference image must be 10MB or smaller.',
+					),
+					400
+				);
+			}
+
+			if (! $ref_tmp || ! is_uploaded_file($ref_tmp)) {
+				return new WP_REST_Response(
+					array(
+						'success' => false,
+						'error'   => 'Invalid reference image upload.',
+					),
+					400
+				);
+			}
+
+			$reference_file_path = $ref_tmp;
+		}
+
 		// Log the generation attempt
 		try {
 			// Call NextJS API integration
-			$api_result = $this->call_nextjs_api($file_path, $preset_id, $additional_instructions);
+			$api_result = $this->call_nextjs_api($file_path, $preset_id, $additional_instructions, $reference_file_path);
 
 			// Check if API call returned an error
 			if (is_array($api_result) && isset($api_result['success']) && ! $api_result['success']) {
@@ -298,12 +426,13 @@ class Photobooster_Ai_REST
 	/**
 	 * Call NextJS API to generate enhanced image.
 	 *
-	 * @param string $file_path   Path to the seed image file.
-	 * @param string $preset_id   Selected preset ID.
-	 * @param string $additional_instructions Optional additional instructions.
+	 * @param string      $file_path             Path to the seed image file.
+	 * @param string      $preset_id             Selected preset ID.
+	 * @param string      $additional_instructions Optional additional instructions.
+	 * @param string|null $reference_file_path   Optional path to a reference image file.
 	 * @return string|false Base64 encoded image data on success, false on failure.
 	 */
-	private function call_nextjs_api($file_path, $preset_id, $additional_instructions)
+	private function call_nextjs_api($file_path, $preset_id, $additional_instructions, $reference_file_path = null)
 	{
 		// Get API configuration from settings
 		$settings = get_option('photobooster_ai_settings', array());
@@ -352,11 +481,25 @@ class Photobooster_Ai_REST
 		}
 		$mime_type = $image_info['mime'];
 
+		// Read optional reference image
+		$reference_image_contents = null;
+		$reference_mime_type      = null;
+		if ($reference_file_path) {
+			$ref_contents = file_get_contents($reference_file_path);
+			if (false !== $ref_contents) {
+				$ref_info = getimagesize($reference_file_path);
+				if (false !== $ref_info) {
+					$reference_image_contents = $ref_contents;
+					$reference_mime_type      = $ref_info['mime'];
+				}
+			}
+		}
+
 		// Create multipart form data boundary
 		$boundary = wp_generate_uuid4();
 
 		// Build multipart form data payload
-		$payload = $this->build_multipart_payload($image_contents, $mime_type, $prompt, $boundary);
+		$payload = $this->build_multipart_payload($image_contents, $mime_type, $prompt, $boundary, $reference_image_contents, $reference_mime_type);
 
 		// Set up HTTP request arguments with authentication
 		$args = array(
@@ -466,13 +609,15 @@ class Photobooster_Ai_REST
 	/**
 	 * Build multipart form data payload for NextJS API.
 	 *
-	 * @param string $image_contents Image file contents.
-	 * @param string $mime_type      Image MIME type.
-	 * @param string $prompt         Generation prompt.
-	 * @param string $boundary       Multipart boundary.
+	 * @param string      $image_contents            Image file contents.
+	 * @param string      $mime_type                 Image MIME type.
+	 * @param string      $prompt                    Generation prompt.
+	 * @param string      $boundary                  Multipart boundary.
+	 * @param string|null $reference_image_contents  Optional reference image file contents.
+	 * @param string|null $reference_mime_type       Optional reference image MIME type.
 	 * @return string Multipart payload.
 	 */
-	private function build_multipart_payload($image_contents, $mime_type, $prompt, $boundary)
+	private function build_multipart_payload($image_contents, $mime_type, $prompt, $boundary, $reference_image_contents = null, $reference_mime_type = null)
 	{
 		$payload = '';
 
@@ -488,6 +633,15 @@ class Photobooster_Ai_REST
 		$payload .= 'Content-Type: ' . $mime_type . "\r\n";
 		$payload .= "\r\n";
 		$payload .= $image_contents . "\r\n";
+
+		// Add optional reference image field
+		if (null !== $reference_image_contents && null !== $reference_mime_type) {
+			$payload .= '--' . $boundary . "\r\n";
+			$payload .= 'Content-Disposition: form-data; name="reference_image"; filename="reference.jpg"' . "\r\n";
+			$payload .= 'Content-Type: ' . $reference_mime_type . "\r\n";
+			$payload .= "\r\n";
+			$payload .= $reference_image_contents . "\r\n";
+		}
 
 		// Close boundary
 		$payload .= '--' . $boundary . '--' . "\r\n";

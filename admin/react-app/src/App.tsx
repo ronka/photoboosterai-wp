@@ -42,10 +42,15 @@ function App({ attachment, onClose }: AppProps) {
     const [additionalInstructions, setAdditionalInstructions] = useState('')
     const [generatedPhotos, setGeneratedPhotos] = useState<GeneratedPhoto[]>([])
     const [selectedImagePopup, setSelectedImagePopup] = useState<GeneratedPhoto | null>(null)
+    const [referenceImage, setReferenceImage] = useState<File | null>(null)
+    const [referenceImagePreview, setReferenceImagePreview] = useState<string | null>(null)
+    const [isDraggingOver, setIsDraggingOver] = useState(false)
+    const [referenceImageError, setReferenceImageError] = useState<string | null>(null)
     const { credits, creditsLoading, creditsError } = useCredits()
     const modalRef = useRef<HTMLDivElement>(null)
     const closeButtonRef = useRef<HTMLButtonElement>(null)
     const imagePopupRef = useRef<HTMLDivElement>(null)
+    const referenceInputRef = useRef<HTMLInputElement>(null)
 
     const handleImageClick = (photo: GeneratedPhoto) => {
         setSelectedImagePopup(photo)
@@ -53,6 +58,55 @@ function App({ attachment, onClose }: AppProps) {
 
     const handleCloseImagePopup = () => {
         setSelectedImagePopup(null)
+    }
+
+    const handleReferenceImageChange = (file: File) => {
+        setReferenceImageError(null)
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+        if (!validTypes.includes(file.type)) {
+            setReferenceImageError('Please upload a JPEG, PNG, or WebP image.')
+            return
+        }
+        const maxSize = 10 * 1024 * 1024 // 10MB
+        if (file.size > maxSize) {
+            setReferenceImageError('Image must be 10MB or smaller.')
+            return
+        }
+        if (referenceImagePreview) {
+            URL.revokeObjectURL(referenceImagePreview)
+        }
+        setReferenceImage(file)
+        setReferenceImagePreview(URL.createObjectURL(file))
+    }
+
+    const handleRemoveReferenceImage = () => {
+        if (referenceImagePreview) {
+            URL.revokeObjectURL(referenceImagePreview)
+        }
+        setReferenceImage(null)
+        setReferenceImagePreview(null)
+        setReferenceImageError(null)
+        if (referenceInputRef.current) {
+            referenceInputRef.current.value = ''
+        }
+    }
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        setIsDraggingOver(true)
+    }
+
+    const handleDragLeave = () => {
+        setIsDraggingOver(false)
+    }
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        setIsDraggingOver(false)
+        const file = e.dataTransfer.files[0]
+        if (file) {
+            handleReferenceImageChange(file)
+        }
     }
 
     const handleGeneratePhotos = async () => {
@@ -65,7 +119,7 @@ function App({ attachment, onClose }: AppProps) {
 
         try {
             // Get WordPress REST API settings
-            const wpSettings = (window as any).photoboosterAiData
+            const wpSettings = (window as any).photobooster_ai_enhance
             if (!wpSettings) {
                 throw new Error('WordPress API settings not found')
             }
@@ -76,6 +130,9 @@ function App({ attachment, onClose }: AppProps) {
             formData.append('preset_id', selectedPreset)
             if (additionalInstructions.trim()) {
                 formData.append('additional_instructions', additionalInstructions.trim())
+            }
+            if (referenceImage) {
+                formData.append('reference_image', referenceImage)
             }
 
             // Make request to WordPress REST API
@@ -173,6 +230,15 @@ function App({ attachment, onClose }: AppProps) {
         }
     }, [])
 
+    // Cleanup reference image object URL on unmount
+    useEffect(() => {
+        return () => {
+            if (referenceImagePreview) {
+                URL.revokeObjectURL(referenceImagePreview)
+            }
+        }
+    }, [referenceImagePreview])
+
     const getSeedImageUrl = () => {
         if (!seedImage) return ''
 
@@ -237,6 +303,60 @@ function App({ attachment, onClose }: AppProps) {
                                     </div>
                                 )}
                             </div>
+                        </div>
+
+                        {/* Reference Image Upload Section */}
+                        <div className="pbai-reference-section">
+                            <h3>Reference Image <span className="pbai-optional-label">(Optional)</span></h3>
+                            {referenceImagePreview ? (
+                                <div className="pbai-reference-preview">
+                                    <img
+                                        src={referenceImagePreview}
+                                        alt="Reference image preview"
+                                        className="pbai-reference-image"
+                                    />
+                                    <button
+                                        className="pbai-reference-remove"
+                                        onClick={handleRemoveReferenceImage}
+                                        aria-label="Remove reference image"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ) : (
+                                <div
+                                    className={`pbai-reference-dropzone${isDraggingOver ? ' pbai-reference-dropzone--active' : ''}`}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                    onDrop={handleDrop}
+                                    onClick={() => referenceInputRef.current?.click()}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => e.key === 'Enter' && referenceInputRef.current?.click()}
+                                    aria-label="Upload reference image"
+                                >
+                                    <span className="pbai-reference-dropzone-icon">🖼️</span>
+                                    <span className="pbai-reference-dropzone-text">
+                                        Drag & drop or <u>click to browse</u>
+                                    </span>
+                                    <input
+                                        ref={referenceInputRef}
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        className="pbai-reference-input"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0]
+                                            if (file) handleReferenceImageChange(file)
+                                        }}
+                                    />
+                                </div>
+                            )}
+                            {referenceImageError && (
+                                <p className="pbai-reference-error">{referenceImageError}</p>
+                            )}
+                            <p className="pbai-reference-hint">
+                                Upload a reference image to guide the AI's style and composition
+                            </p>
                         </div>
 
                         {/* Configuration Options */}

@@ -24,7 +24,7 @@ export function useCredits(): UseCreditsReturn {
                 setCreditsError(null)
 
                 // Get WordPress REST API settings
-                const wpSettings = (window as any).photoboosterAiData
+                const wpSettings = (window as any).photobooster_ai_enhance
                 if (!wpSettings) {
                     throw new Error('WordPress API settings not found')
                 }
