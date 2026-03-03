@@ -160,7 +160,7 @@ function App({ attachment, onClose }: AppProps) {
             // Add to generated photos list
             setGeneratedPhotos(prev => [newPhoto, ...prev])
 
-            alert('Image generated successfully!')
+            alert('Image generated successfully! Refresh the page to see the new photo in media library')
 
         } catch (error) {
             console.error('Image generation error:', error)
