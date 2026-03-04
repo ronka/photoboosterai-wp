@@ -1,5 +1,5 @@
 === eCommerce Product Photo Booster AI ===
-Contributors: photobooster-ai
+Contributors: ronka
 Donate link: https://photoboosterai.com/
 Tags: ai, image-generation, product-photos, e-commerce, photography
 Requires at least: 5.0
